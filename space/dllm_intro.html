@@ -1,0 +1,2112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiniMind Extended: Discrete Diffusion Language Models</title>
+  <style>
+    :root {
+      --bg: #141414;
+      --panel: #1e1e1e;
+      --panel-2: #282828;
+      --line: #404040;
+      --line-strong: #585858;
+      --text: #e0e0e0;
+      --text-2: #a8a8a8;
+      --text-3: #707070;
+      --accent: #8ab4a6;
+      --accent-2: #8da4c0;
+      --accent-3: #c0a882;
+      --mask: #5c2b2b;
+      --mask-border: #a04040;
+      --done: #3a7a4a;
+      --reveal: #2a4a2a;
+      --reveal-border: #4a8a4a;
+      --prompt: #555555;
+      --mask-text: #e88;
+      --reveal-text: #6cbf6c;
+      --error-text: #e57;
+      --shadow: none;
+      --radius: 4px;
+      --content: 1180px;
+    }
+
+    body.light {
+      --bg: #ffffff;
+      --panel: #ffffff;
+      --panel-2: #f7f7f7;
+      --line: #d9d9d9;
+      --line-strong: #bfbfbf;
+      --text: #1f1f1c;
+      --text-2: #5f5b53;
+      --text-3: #8b867d;
+      --accent: #506c60;
+      --accent-2: #607090;
+      --accent-3: #8c7b69;
+      --mask: #f5c6c6;
+      --mask-border: #e57373;
+      --done: #4a7c59;
+      --reveal: #c8e6c9;
+      --reveal-border: #66bb6a;
+      --prompt: #7f7f7f;
+      --mask-text: #b71c1c;
+      --reveal-text: #2e7d32;
+      --error-text: #c62828;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    input[type="number"], input[type="text"], select {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    input[type="range"] {
+      accent-color: var(--accent);
+    }
+    body {
+      margin: 0;
+      font-family: "Cambria", "Georgia", "Times New Roman", "PingFang SC", "Hiragino Sans GB", serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+
+    .page {
+      width: min(var(--content), calc(100vw - 48px));
+      margin: 0 auto;
+    }
+
+    header.hero {
+      padding: 64px 0 36px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Cambria", "Times New Roman", serif;
+      font-size: clamp(36px, 5vw, 60px);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      margin-top: 18px;
+      max-width: 860px;
+      font-size: 18px;
+      color: var(--text-2);
+    }
+
+    .top-meta {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+    }
+
+    .meta-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .meta-label {
+      font-size: 11px;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .meta-value {
+      font-size: 14px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    nav.toc {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .toc-inner {
+      width: min(var(--content), calc(100vw - 48px));
+      margin: 0 auto;
+      display: flex;
+      gap: 20px;
+      overflow-x: auto;
+      padding: 14px 0;
+      white-space: nowrap;
+    }
+
+    .toc a {
+      color: var(--text-2);
+      text-decoration: none;
+      font-size: 13px;
+    }
+
+    .toc a:hover { color: var(--text); }
+
+    section {
+      padding: 48px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      font-family: "Cambria", "Times New Roman", serif;
+      font-size: 34px;
+      line-height: 1.15;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      margin: 0 0 12px;
+      font-size: 20px;
+      line-height: 1.25;
+      font-weight: 650;
+    }
+
+    p.lead {
+      margin: 0 0 26px;
+      color: var(--text-2);
+      font-size: 17px;
+      max-width: 900px;
+    }
+
+    p, li { color: var(--text-2); font-size: 15px; }
+    ul, ol { margin: 0; padding-left: 22px; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 650;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .formula {
+      font-family: "Cambria Math", "Times New Roman", serif;
+      font-size: 24px;
+      text-align: center;
+      color: var(--text);
+      padding: 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow-x: auto;
+    }
+
+    .codeblock {
+      font-family: "Consolas", "SFMono-Regular", monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      text-align: left;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    th:last-child, td:last-child { border-right: none; }
+    tr:last-child td { border-bottom: none; }
+    th {
+      background: var(--panel-2);
+      color: var(--text);
+      font-weight: 650;
+    }
+
+    .figure {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .caption {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--text-3);
+    }
+
+    .pipeline,
+    .a2d-flow,
+    .block-flow,
+    .timeline {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .step-box {
+      min-width: 160px;
+      flex: 1 1 160px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-top: 2px solid var(--line-strong);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+
+    .step-box h4 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .arrow {
+      color: var(--text-3);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .token-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .token {
+      min-width: 44px;
+      height: 36px;
+      padding: 0 10px;
+      border-radius: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    .token.prompt { background: var(--prompt); color: #e0e0e0; border-color: var(--prompt); }
+    .token.mask { background: var(--mask); color: var(--mask-text); border-color: var(--mask-border); }
+    .token.reveal { background: var(--reveal); color: var(--reveal-text); border-color: var(--reveal-border); }
+    .token.done { background: var(--done); color: #e0e0e0; border-color: var(--done); }
+
+    .dual-compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .compare-col {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .compare-col h4 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    .note-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .small-note {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .small-note strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .param-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .param-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+    }
+
+    .param-name {
+      font-family: "Consolas", monospace;
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    /* 动画教学区块 */
+    .animation-demo {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .animation-demo h3 {
+      margin: 0 0 16px;
+      font-size: 18px;
+      font-weight: 650;
+    }
+
+    .animation-stage {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .animation-frame {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      transition: all 0.3s ease;
+    }
+
+    .animation-frame.active {
+      border-color: var(--accent);
+      background: var(--panel-2);
+    }
+
+    .frame-label {
+      min-width: 140px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-2);
+    }
+
+    .frame-tokens {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* 动画 token 样式 */
+    .anim-token {
+      min-width: 32px;
+      height: 28px;
+      padding: 0 6px;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .anim-token.prompt {
+      background: var(--prompt);
+      color: #e0e0e0;
+      border-color: var(--prompt);
+    }
+
+    .anim-token.mask {
+      background: var(--mask);
+      color: var(--mask-text);
+      border-color: var(--mask-border);
+    }
+
+    .anim-token.reveal {
+      background: var(--reveal);
+      color: var(--reveal-text);
+      border-color: var(--reveal-border);
+      animation: tokenReveal 0.6s ease;
+    }
+
+    .anim-token.done {
+      background: var(--done);
+      color: #e0e0e0;
+      border-color: var(--done);
+    }
+
+    .anim-token.highlight {
+      box-shadow: 0 0 0 2px var(--accent);
+      transform: scale(1.1);
+    }
+
+    @keyframes tokenReveal {
+      0% { 
+        background: var(--mask); 
+        color: var(--mask-text); 
+        border-color: var(--mask-border);
+        transform: scale(0.8);
+        opacity: 0.5;
+      }
+      50% {
+        transform: scale(1.15);
+      }
+      100% { 
+        background: var(--reveal); 
+        color: var(--reveal-text); 
+        border-color: var(--reveal-border);
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* 动画控制 */
+    .anim-demo-container {
+      position: relative;
+    }
+
+    .anim-controls {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .anim-btn {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      background: var(--panel-2);
+      border: 1px solid var(--line-strong);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .anim-btn:hover {
+      background: var(--line);
+      border-color: var(--accent);
+    }
+
+    .anim-btn.active {
+      background: var(--accent);
+      color: var(--bg);
+      border-color: var(--accent);
+    }
+
+    .anim-btn.play-btn {
+      margin-left: auto;
+      background: var(--accent-2);
+      color: var(--bg);
+      border-color: var(--accent-2);
+    }
+
+    .anim-progress {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .progress-step {
+      flex: 1;
+      height: 3px;
+      background: var(--line);
+      transition: background 0.4s;
+    }
+
+    .progress-step.active {
+      background: var(--accent);
+    }
+
+    .anim-explanation {
+      padding: 14px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      font-size: 13px;
+      color: var(--text-2);
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+
+    .anim-explanation strong {
+      color: var(--text);
+    }
+
+    .anim-explanation em {
+      font-style: normal;
+      background: color-mix(in srgb, var(--accent-3) 25%, transparent);
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    .confidence-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+      padding: 8px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      font-size: 11px;
+    }
+
+    .confidence-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .confidence-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--line);
+    }
+
+    .confidence-dot.high {
+      background: #4caf50;
+    }
+
+    .confidence-dot.medium {
+      background: #ff9800;
+    }
+
+    .confidence-dot.low {
+      background: #f44336;
+    }
+
+    .param-value {
+      font-size: 18px;
+      color: var(--accent-2);
+      margin-bottom: 6px;
+      font-weight: 700;
+    }
+
+    .footer {
+      padding: 48px 0 70px;
+    }
+
+    .references li {
+      font-family: "Consolas", monospace;
+      font-size: 13px;
+      color: var(--text-2);
+    }
+
+    /* i18n */
+    .en { display: none; }
+    .zh { display: inline; }
+    body.lang-en .en { display: inline; }
+    body.lang-en .zh { display: none; }
+    body.lang-en .zh-only { display: none; }
+    body:not(.lang-en) .en-only { display: none; }
+
+    .lang-switch {
+      position: fixed;
+      top: 12px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      gap: 2px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      font-size: 12px;
+    }
+    .lang-switch button {
+      padding: 4px 12px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-3);
+      font-size: 12px;
+    }
+    .lang-switch button.active {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+    .theme-switch {
+      position: fixed;
+      top: 12px;
+      right: 120px;
+      z-index: 1000;
+      display: flex;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      font-size: 12px;
+    }
+    .theme-switch button {
+      padding: 4px 10px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-3);
+      font-size: 12px;
+    }
+    .theme-switch button.active {
+      background: var(--text);
+      color: var(--bg);
+    }
+
+    @media (max-width: 980px) {
+      .grid-2, .grid-3, .grid-4, .dual-compare, .note-grid, .param-grid, .top-meta {
+        grid-template-columns: 1fr;
+      }
+      h1 { font-size: 40px; }
+      h2 { font-size: 28px; }
+      section { padding: 36px 0; }
+    }
+  </style>
+</head>
+<body class="lang-en">
+  <div class="theme-switch">
+    <button id="btn-light" onclick="switchTheme('light')">Light</button>
+    <button id="btn-dark" class="active" onclick="switchTheme('dark')">Dark</button>
+  </div>
+  <div class="lang-switch">
+    <button id="btn-zh" onclick="switchLang('zh')">中文</button>
+    <button id="btn-en" class="active" onclick="switchLang('en')">EN</button>
+  </div>
+  <script>
+    function switchLang(lang) {
+      document.body.classList.toggle('lang-en', lang === 'en');
+      document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
+      if (typeof randomizeMask === 'function') randomizeMask();
+      if (typeof resetSimulation === 'function') resetSimulation();
+    }
+    function switchTheme(theme) {
+      document.body.classList.toggle('light', theme === 'light');
+      document.getElementById('btn-dark').classList.toggle('active', theme === 'dark');
+      document.getElementById('btn-light').classList.toggle('active', theme === 'light');
+    }
+    function L() { return document.body.classList.contains('lang-en') ? 'en' : 'zh'; }
+  </script>
+  <nav class="toc">
+    <div class="toc-inner">
+      <a href="#overview"><span class="zh">概览</span><span class="en">Overview</span></a>
+      <a href="#ar"><span class="zh">AR 基础</span><span class="en">AR Basics</span></a>
+      <a href="#motivation"><span class="zh">为什么需要 dLM</span><span class="en">Why DLLM</span></a>
+      <a href="#diffusion"><span class="zh">离散扩散直觉</span><span class="en">Discrete Diffusion</span></a>
+      <a href="#training"><span class="zh">训练</span><span class="en">Training</span></a>
+      <a href="#inference"><span class="zh">推理</span><span class="en">Inference</span></a>
+      <a href="#a2d">A2D</a>
+      <a href="#sampling"><span class="zh">采样</span><span class="en">Sampling</span></a>
+      <a href="#compare"><span class="zh">对比</span><span class="en">Comparison</span></a>
+      <a href="#tuning"><span class="zh">调参</span><span class="en">Tuning</span></a>
+      <a href="#practice"><span class="zh">实践</span><span class="en">Practice</span></a>
+      <a href="#future"><span class="zh">未来</span><span class="en">Future</span></a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="page">
+      <div class="eyebrow">MiniMind · Extended Tutorial</div>
+      <h1><span class="zh">离散扩散语言模型：原理与实现</span><span class="en">Discrete Diffusion Language Models: Principles &amp; Implementation</span></h1>
+    </div>
+  </header>
+
+  <main class="page">
+    <section id="overview">
+      <h2><span class="zh">技术总览</span><span class="en">Technical Overview</span></h2>
+      <p class="lead">
+        <span class="zh">自回归（AR）语言模型将文本生成建模为链式条件概率的逐步采样；扩散语言模型（dLM）则将其建模为从全掩码序列到目标序列的迭代去噪过程。两者的根本区别在于：前者是严格的顺序生成，后者允许全局建模与并行揭示。</span>
+        <span class="en">Autoregressive LMs decompose text generation as a chain of conditional probabilities; diffusion LMs model it as iterative denoising from a fully masked sequence. The former emphasizes sequential generation, the latter global modeling and parallel reveal.</span>
+      </p>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title"><span class="zh">问题定义</span><span class="en">Problem</span></div>
+          <p><span class="zh">语言生成能否摆脱固定的从左到右的顺序约束，转而优先确定高置信度位置？</span><span class="en">Can language generation move beyond fixed left-to-right order and prioritize high-confidence positions?</span></p>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="zh">核心答案</span><span class="en">Core Answer</span></div>
+          <p><span class="zh">dLM 以随机掩码、双向预测与多步揭示，替代 AR 的单向 next-token prediction。</span><span class="en">DLLM replaces AR's unidirectional next-token prediction with random masking, bidirectional prediction, and multi-step reveal.</span></p>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="zh">工程意义</span><span class="en">Engineering Impact</span></div>
+          <p><span class="zh">其意义不在于替代 AR，而在于扩展生成范式：天然支持 infilling、全局重评估与可控的揭示顺序。</span><span class="en">Rather than simply replacing AR, it extends the generation paradigm: naturally supporting infilling, global re-evaluation, and controllable reveal order.</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="ar">
+      <h2><span class="zh">AR 的本质：一条链</span><span class="en">AR Essentials: A Chain</span></h2>
+      <div class="grid-2">
+        <div>
+          <div class="formula">p(x) = ∏<sub>i=1</sub><sup>N</sup> p(x<sub>i</sub> | x&lt;i)</div>
+          <p class="lead" style="margin-top:18px;">
+            <span class="zh">文本被分解为一条严格有序的决策链：第 <em>i</em> 个词元仅依赖其左侧上下文，信息流严格单向。</span>
+            <span class="en">Text is decomposed into a strictly ordered decision chain: token <em>i</em> depends only on left context; information flows unidirectionally.</span>
+          </p>
+          <ul>
+            <li><span class="zh">训练与推理的目标完全一致：均为 next-token prediction。</span><span class="en">Training and inference share the same objective: next-token prediction.</span></li>
+            <li><span class="zh">每一步仅针对当前位置，缺乏全局重评估机制。</span><span class="en">Each step targets only the current position with no global re-evaluation.</span></li>
+            <li><span class="zh">生成顺序固定为从左到右，逐词元展开。</span><span class="en">Generation order is fixed: left-to-right, token by token.</span></li>
+          </ul>
+        </div>
+        <div class="figure">
+          <div class="token-row" style="margin-bottom: 10px;">
+            <span class="token prompt"><span class="zh">你</span><span class="en">Hi</span></span>
+            <span class="arrow">→</span>
+            <span class="token prompt"><span class="zh">好</span><span class="en">!</span></span>
+            <span class="arrow">→</span>
+            <span class="token"><span class="zh">我</span><span class="en">I</span></span>
+            <span class="arrow">→</span>
+            <span class="token"><span class="zh">是</span><span class="en">am</span></span>
+            <span class="arrow">→</span>
+            <span class="token">AI</span>
+            <span class="arrow">→</span>
+            <span class="token"><span class="zh">助手</span><span class="en">assistant</span></span>
+          </div>
+          <div class="caption"><span class="zh">图 1. AR 的链式依赖结构：每个词元的生成严格依赖其前序输出。</span><span class="en">Fig 1. Chain dependency in AR: each token strictly depends on the previous one.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="motivation">
+      <h2><span class="zh">为什么需要 dLM</span><span class="en">Why DLLM</span></h2>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title"><span class="zh">串行生成 O(N)</span><span class="en">Sequential O(N)</span></div>
+          <p><span class="zh">生成 N 个词元需要 N 次前向传播。KV Cache 仅能降低单步开销，无法改变串行的本质。</span><span class="en">Generating 1000 tokens requires ~1000 forward passes. KV cache reduces cost but not the sequential nature.</span></p>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="zh">固定顺序的局限性</span><span class="en">Fixed-Order Limitation</span></div>
+          <p><span class="zh">许多任务天然适合先确定全局结构、再填充局部细节的生成方式。</span><span class="en">Many tasks benefit from determining global structure first, then filling in details.</span></p>
+        </div>
+        <div class="card">
+          <div class="card-title">Exposure Bias</div>
+          <p><span class="zh">训练依赖 ground truth 而推理依赖模型自身输出，二者的分布偏差随步数累积。</span><span class="en">Training relies on ground truth while inference relies on model output; errors accumulate.</span></p>
+        </div>
+      </div>
+      <div class="dual-compare" style="margin-top: 24px;">
+        <div class="compare-col">
+          <h4><span class="zh">顺序生成范式（AR）</span><span class="en">Sequential Paradigm (AR)</span></h4>
+          <p><span class="zh">严格从左到右逐词元生成；一旦某位置出错，后续所有条件分布均受污染。</span><span class="en">Strictly left-to-right; once an error occurs, all subsequent conditional distributions are affected.</span></p>
+        </div>
+        <div class="compare-col">
+          <h4><span class="zh">全局揭示范式（dLM）</span><span class="en">Global Reveal Paradigm (DLLM)</span></h4>
+          <p><span class="zh">基于全局上下文同时评估所有位置的置信度，优先填充最确定的位置；揭示顺序由模型自行决定。</span><span class="en">Evaluates confidence across all positions globally; fills highest-confidence positions first; order is dynamically determined.</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="diffusion">
+      <h2><span class="zh">从连续扩散到离散扩散</span><span class="en">From Continuous to Discrete Diffusion</span></h2>
+      <p class="lead">
+        <span class="zh">图像扩散使用连续高斯噪声；文本不存在自然的连续噪声空间，因此 dLM 以 MASK token 作为离散噪声的替代。</span>
+        <span class="en">Image diffusion uses continuous Gaussian noise; text has no natural continuous noise space, so DLLM uses MASK as a discrete noise proxy.</span>
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th><span class="zh">概念</span><span class="en">Concept</span></th>
+            <th><span class="zh">连续扩散（DDPM）</span><span class="en">Continuous (DDPM)</span></th>
+            <th><span class="zh">离散扩散（MDLM / dLM）</span><span class="en">Discrete (MDLM / DLLM)</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="zh">噪声</span><span class="en">Noise</span></td>
+            <td><span class="zh">高斯噪声</span><span class="en">Gaussian</span></td>
+            <td><span class="zh">随机 MASK</span><span class="en">Random MASK</span></td>
+          </tr>
+          <tr>
+            <td><span class="zh">去噪目标</span><span class="en">Denoising target</span></td>
+            <td><span class="zh">预测原始像素</span><span class="en">Predict original pixels</span></td>
+            <td><span class="zh">预测被 MASK 的词元</span><span class="en">Predict masked tokens</span></td>
+          </tr>
+          <tr>
+            <td><span class="zh">前向过程</span><span class="en">Forward</span></td>
+            <td><span class="zh">x₀ → x<sub>T</sub>，越来越模糊</span><span class="en">x₀ → x<sub>T</sub>, increasingly blurred</span></td>
+            <td><span class="zh">x₀ → x<sub>T</sub>，越来越多位置被掩码</span><span class="en">x₀ → x<sub>T</sub>, more positions masked</span></td>
+          </tr>
+          <tr>
+            <td><span class="zh">反向过程</span><span class="en">Reverse</span></td>
+            <td><span class="zh">逐步去噪</span><span class="en">Gradual denoising</span></td>
+            <td><span class="zh">逐步揭示</span><span class="en">Gradual reveal</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="training">
+      <h2><span class="zh">dLM 的训练机制</span><span class="en">Training: How DLLM Learns to Fill Blanks</span></h2>
+      <div class="figure" style="margin-bottom: 20px;">
+        <div class="pipeline">
+          <div class="step-box">
+            <h4><span class="zh">Step 1 — 采样 t</span><span class="en">Step 1 — Sample t</span></h4>
+            <div class="codeblock">t ~ U[0,1)</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="step-box">
+            <h4><span class="zh">Step 2 — 随机 mask</span><span class="en">Step 2 — Random mask</span></h4>
+            <div class="codeblock"><span class="zh">按 t 比例随机掩码 assistant 区</span><span class="en">Randomly mask assistant region by ratio t</span></div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="step-box">
+            <h4><span class="zh">Step 3 — 双向前向传播</span><span class="en">Step 3 — Bidirectional forward</span></h4>
+            <div class="codeblock"><span class="zh">预测所有被掩码位置</span><span class="en">Predict all masked positions</span></div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="step-box">
+            <h4><span class="zh">Step 4 — 只在掩码位置算 loss</span><span class="en">Step 4 — Loss on masked only</span></h4>
+            <div class="codeblock">loss = CE / p_mask</div>
+          </div>
+        </div>
+        <div class="caption"><span class="zh">图 2. dLM 单步训练流程。</span><span class="en">Fig 2. Single-step DLLM training pipeline.</span></div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <h3><span class="zh">单步训练流程示意</span><span class="en">Single-Step Training Illustration</span></h3>
+          <div class="figure" style="padding: 18px;">
+            <div class="pipeline" style="flex-direction: column; align-items: stretch; gap: 10px;">
+              <div class="step-box">
+                <h4><span class="zh">Step 1 · 采样 t</span><span class="en">Step 1 · Sample t</span></h4>
+                <p><span class="zh">从均匀分布采样 t ∼ U[0,1)，以此确定 assistant 区域的 mask 比例。</span><span class="en">Sample t ~ U[0,1) to determine mask intensity for the assistant region.</span></p>
+              </div>
+              <div class="step-box">
+                <h4><span class="zh">Step 2 · 随机 mask assistant 区</span><span class="en">Step 2 · Random mask assistant region</span></h4>
+                <div class="token-row" style="margin-top: 8px;">
+                  <span class="token prompt">Q</span><span class="token prompt">Q</span><span class="token prompt">Q</span><span class="token prompt">Q</span><span class="token prompt">Q</span>
+                  <span class="token">A</span><span class="token mask">M</span><span class="token">A</span><span class="token mask">M</span><span class="token mask">M</span>
+                  <span class="token mask">M</span><span class="token">A</span><span class="token mask">M</span><span class="token mask">M</span>
+                </div>
+                <p style="margin-top: 8px;"><span class="zh">Prompt 区域保持不变；assistant 区域按比例 t 随机替换为 MASK。</span><span class="en">Prompt stays intact; assistant region is randomly replaced with MASK by ratio t.</span></p>
+              </div>
+              <div class="step-box">
+                <h4><span class="zh">Step 3 · 双向前向传播</span><span class="en">Step 3 · Bidirectional forward</span></h4>
+                <p><span class="zh">模型以带 MASK 的完整序列为输入，输出所有被掩码位置的词元分布。</span><span class="en">Model takes the masked sequence as input and outputs classification distributions for all masked positions.</span></p>
+              </div>
+              <div class="step-box">
+                <h4><span class="zh">Step 4 — 只在 M 位置算 loss</span><span class="en">Step 4 — Loss on M positions only</span></h4>
+                <div class="formula" style="margin: 0; padding: 10px 12px; font-size: 18px;">loss = Σ<sub><span class="zh"></span>i∈{我,AI,助}</span><span class="en">i∈{I,AI,assis}</span></sub> CE(pred<sub>i</sub>, target<sub>i</sub>) / p<sub>mask</sub></div>
+                <p style="margin-top: 8px;"><span class="zh">仅在 MASK 位置计算损失，并按 p<sub>mask</sub> 进行重加权。</span><span class="en">Non-MASK positions are excluded; MASK positions are weighted by p<sub>mask</sub>.</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <h3><span class="zh">和 BERT / AR 的关键区别</span><span class="en">Key Differences from BERT / AR</span></h3>
+          <div class="note-grid">
+            <div class="small-note">
+              <strong><span class="zh">相较于 BERT</span><span class="en">vs. BERT</span></strong>
+              <p><span class="zh">BERT 使用固定的 mask 比例（如 15%）；dLM 通过连续参数 t 覆盖从低到高的全部损坏强度。</span><span class="en">BERT uses a fixed mask ratio; DLLM uses continuous t covering all corruption intensities.</span></p>
+            </div>
+            <div class="small-note">
+              <strong><span class="zh">相较于 AR</span><span class="en">vs. AR</span></strong>
+              <p><span class="zh">AR 仅学习预测下一个词元；dLM 学习同时恢复多个被掩码位置。</span><span class="en">AR learns only the next token; DLLM learns to recover multiple positions simultaneously.</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="margin-top: 28px;"><span class="zh">训练时的 mask → 预测 → 损失计算详细过程</span><span class="en">Training: Mask → Predict → Loss Computation</span></h3>
+      
+      <div class="figure" style="margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div>
+            <div class="small-note" style="padding: 12px;">
+              <strong style="font-size: 12px; margin-bottom: 8px; display: block;"><span class="zh">Step 1 · 原始完整序列</span><span class="en">Step 1 · Original sequence</span></strong>
+              <div class="token-row" style="margin-top: 8px;">
+                <span class="token prompt"><span class="zh">你</span><span class="en">Hi</span></span>
+                <span class="token prompt"><span class="zh">好</span><span class="en">!</span></span>
+                <span class="token done"><span class="zh">我</span><span class="en">I</span></span>
+                <span class="token done"><span class="zh">是</span><span class="en">am</span></span>
+                <span class="token done">AI</span>
+                <span class="token done"><span class="zh">助</span><span class="en">assis</span></span>
+                <span class="token done"><span class="zh">手</span><span class="en">tant</span></span>
+              </div>
+              <p style="margin: 8px 0 0; font-size: 12px; color: var(--text-3);"><span class="zh">Prompt + assistant 完整文本</span><span class="en">Complete prompt + assistant text</span></p>
+            </div>
+          </div>
+          
+          <div>
+            <div class="small-note" style="padding: 12px;">
+              <strong style="font-size: 12px; margin-bottom: 8px; display: block;"><span class="zh">Step 2 · 按 t 随机 mask</span><span class="en">Step 2 · Random mask by t</span></strong>
+              <div class="token-row" style="margin-top: 8px;">
+                <span class="token prompt"><span class="zh">你</span><span class="en">Hi</span></span>
+                <span class="token prompt"><span class="zh">好</span><span class="en">!</span></span>
+                <span class="token mask">M</span>
+                <span class="token done"><span class="zh">是</span><span class="en">am</span></span>
+                <span class="token mask">M</span>
+                <span class="token mask">M</span>
+                <span class="token done"><span class="zh">手</span><span class="en">tant</span></span>
+              </div>
+              <p style="margin: 8px 0 0; font-size: 12px; color: var(--text-3);"><span class="zh">t=0.6 → assistant 区 60% 被 mask</span><span class="en">t=0.6 → 60% of assistant region masked</span></p>
+            </div>
+          </div>
+          
+          <div>
+            <div class="small-note" style="padding: 12px;">
+              <strong style="font-size: 12px; margin-bottom: 8px; display: block;"><span class="zh">Step 3 · 模型预测</span><span class="en">Step 3 · Model prediction</span></strong>
+              <div class="token-row" style="margin-top: 8px;">
+                <span class="token prompt"><span class="zh">你</span><span class="en">Hi</span></span>
+                <span class="token prompt"><span class="zh">好</span><span class="en">!</span></span>
+                <span class="token reveal"><span class="zh">我</span><span class="en">I</span></span>
+                <span class="token done"><span class="zh">是</span><span class="en">am</span></span>
+                <span class="token reveal">AI</span>
+                <span class="token reveal"><span class="zh">助</span><span class="en">assis</span></span>
+                <span class="token done"><span class="zh">手</span><span class="en">tant</span></span>
+              </div>
+              <p style="margin: 8px 0 0; font-size: 12px; color: var(--text-3);"><span class="zh">双向 forward → 预测所有 M 位置</span><span class="en">Bidirectional forward → predict all M positions</span></p>
+            </div>
+          </div>
+        </div>
+        
+        <div style="border-top: 1px solid var(--line); padding-top: 16px;">
+          <div class="small-note" style="padding: 12px;">
+            <strong style="font-size: 12px; margin-bottom: 8px; display: block;"><span class="zh">损失计算：只在 mask 位置</span><span class="en">Loss: masked positions only</span></strong>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px;">
+              <div>
+                <p style="margin: 0 0 6px; font-size: 12px; color: var(--text-2);"><span class="zh">预测词元</span><span class="en">Predicted</span></p>
+                <div class="token-row">
+                  <span class="token reveal"><span class="zh">我</span><span class="en">I</span></span>
+                  <span class="token reveal">AI</span>
+                  <span class="token reveal"><span class="zh">助</span><span class="en">assis</span></span>
+                </div>
+              </div>
+              <div>
+                <p style="margin: 0 0 6px; font-size: 12px; color: var(--text-2);"><span class="zh">真实词元</span><span class="en">Ground truth</span></p>
+                <div class="token-row">
+                  <span class="token done"><span class="zh">我</span><span class="en">I</span></span>
+                  <span class="token done">AI</span>
+                  <span class="token done"><span class="zh">助</span><span class="en">assis</span></span>
+                </div>
+              </div>
+            </div>
+            <div style="margin-top: 12px; padding: 10px; background: var(--panel-2); border: 1px solid var(--line);">
+              <p style="margin: 0; font-size: 13px; color: var(--text-2);">
+                <strong><span class="zh">损失公式：</span><span class="en">Loss formula: </span></strong>loss = Σ<sub><span class="zh">i∈{我,AI,助}</span><span class="en">i∈{I,AI,assis}</span></sub> CE(pred<sub>i</sub>, target<sub>i</sub>) / p<sub>mask</sub>
+              </p>
+              <p style="margin: 6px 0 0; font-size: 12px; color: var(--text-3);">
+<span class="zh">非 mask 位置不参与损失计算；p<sub>mask</sub> 平衡不同 t 下的梯度贡献。</span><span class="en">Non-mask positions excluded; p<sub>mask</sub> balances gradient contribution across different t.</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="caption"><span class="zh">图 3. dLM 训练流程：mask → 预测 → 损失计算。</span><span class="en">Fig 3. DLLM training: mask → predict → loss computation.</span></div>
+      </div>
+      
+      <!-- 交互式训练模拟器 -->
+      <div class="animation-demo" id="training-simulator">
+        <h3><span class="zh">交互式训练模拟器</span><span class="en">Interactive Training Simulator</span></h3>
+        
+        <!-- 参数设置 -->
+        <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 16px; margin-bottom: 20px; padding: 16px; background: var(--panel-2); border: 1px solid var(--line);">
+          <div>
+            <label style="font-size: 11px; color: var(--text-3); display: block; margin-bottom: 4px;"><span class="zh">t 值 (mask 比例)</span><span class="en">t (mask ratio)</span></label>
+            <input type="range" id="train-t" min="0" max="100" value="60" style="width: 100%;" oninput="updateTraining()">
+            <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-3);">
+              <span>0.0</span>
+              <span id="train-t-value" style="font-weight: 600; color: var(--text);">0.60</span>
+              <span>1.0</span>
+            </div>
+          </div>
+          <div>
+            <label style="font-size: 11px; color: var(--text-3); display: block; margin-bottom: 4px;"><span class="zh">当前步骤</span><span class="en">Current Step</span></label>
+            <div style="display: flex; gap: 8px;">
+              <button onclick="setTrainStep(0)" id="train-step-0" class="anim-btn active" style="flex: 1;"><span class="zh">原始序列</span><span class="en">Original</span></button>
+              <button onclick="setTrainStep(1)" id="train-step-1" class="anim-btn" style="flex: 1;"><span class="zh">随机 mask</span><span class="en">Mask</span></button>
+              <button onclick="setTrainStep(2)" id="train-step-2" class="anim-btn" style="flex: 1;"><span class="zh">模型预测</span><span class="en">Predict</span></button>
+              <button onclick="setTrainStep(3)" id="train-step-3" class="anim-btn" style="flex: 1;"><span class="zh">loss 计算</span><span class="en">Loss</span></button>
+            </div>
+          </div>
+          <div>
+            <label style="font-size: 11px; color: var(--text-3); display: block; margin-bottom: 4px;"><span class="zh">操作</span><span class="en">Actions</span></label>
+            <div style="display: flex; gap: 8px;">
+              <button onclick="randomizeMask()" style="flex: 1; padding: 6px; border: 1px solid var(--line); background: var(--panel-2); cursor: pointer; font-size: 12px; color: var(--text); border-color: var(--line-strong);"><span class="zh">重新 mask</span><span class="en">Re-mask</span></button>
+              <button onclick="playTraining()" id="train-play-btn" style="flex: 1; padding: 6px; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); cursor: pointer; font-size: 12px;">▶ Play</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 序列展示：双行对比 -->
+        <div style="padding: 16px; background: var(--panel); border: 1px solid var(--line); margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); margin-bottom: 8px;">
+            <span><span class="zh">序列状态</span><span class="en">Sequence State</span></span>
+            <span id="train-status">Original sequence</span>
+          </div>
+          <div id="train-token-display"></div>
+        </div>
+        
+        <!-- loss 计算详情（可滚动列表） -->
+        <div style="padding: 12px; background: var(--panel-2); border: 1px solid var(--line); margin-bottom: 12px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); margin-bottom: 6px;">
+            <span><span class="zh">loss 计算详情（仅 mask 位置）</span><span class="en">Loss details (masked only)</span></span>
+            <span id="train-loss-summary"></span>
+          </div>
+          <div id="train-loss-detail" style="max-height: 180px; overflow-y: auto; font-size: 12px; color: var(--text-2);"></div>
+        </div>
+        
+        <!-- 统计 -->
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 12px; font-size: 12px;">
+          <div style="padding: 10px; background: var(--panel); border: 1px solid var(--line); text-align: center;">
+            <div style="color: var(--text-3); font-size: 10px;"><span class="zh">t 值</span><span class="en">t</span></div>
+            <div id="stat-t" style="font-size: 18px; font-weight: 600; color: var(--accent);">0.60</div>
+          </div>
+          <div style="padding: 10px; background: var(--panel); border: 1px solid var(--line); text-align: center;">
+            <div style="color: var(--text-3); font-size: 10px;"><span class="zh">mask 数量</span><span class="en"># masks</span></div>
+            <div id="stat-mask-count" style="font-size: 18px; font-weight: 600; color: var(--text);">0</div>
+          </div>
+          <div style="padding: 10px; background: var(--panel); border: 1px solid var(--line); text-align: center;">
+            <div style="color: var(--text-3); font-size: 10px;">p_mask</div>
+            <div id="stat-p-mask" style="font-size: 18px; font-weight: 600; color: var(--accent-2);">0.60</div>
+          </div>
+          <div style="padding: 10px; background: var(--panel); border: 1px solid var(--line); text-align: center;">
+            <div style="color: var(--text-3); font-size: 10px;"><span class="zh">CE 总和</span><span class="en">CE sum</span></div>
+            <div id="stat-ce-sum" style="font-size: 18px; font-weight: 600; color: var(--text);">0.00</div>
+          </div>
+          <div style="padding: 10px; background: var(--panel); border: 1px solid var(--line); text-align: center;">
+            <div style="color: var(--text-3); font-size: 10px;"><span class="zh">加权 loss</span><span class="en">Weighted loss</span></div>
+            <div id="stat-weighted-loss" style="font-size: 18px; font-weight: 600; color: var(--accent);">0.00</div>
+          </div>
+        </div>
+        
+        <!-- 说明 -->
+        <div id="train-explanation" style="padding: 14px; background: var(--panel-2); border: 1px solid var(--line); font-size: 13px; color: var(--text-2); line-height: 1.6;"></div>
+        
+        <div class="caption"><span class="zh">拖动 t 值滑块调整 mask 比例，点击步骤按钮查看训练过程。loss = Σ CE / p_mask。</span><span class="en">Drag the t slider to adjust mask ratio. Click step buttons to inspect training. loss = Σ CE / p_mask.</span></div>
+      </div>
+      
+      <script>
+        // 训练模拟器状态
+        const trainState = {
+          promptTokens: L() === 'zh' ? ['请', '用', '一', '段', '话', '介', '绍', 'AI'] : ['Please', 'describe', 'AI', 'in', 'one', 'paragraph'],
+          assistantTokens: L() === 'zh' ? ['人', '工', '智', '能', '是', '一', '种', '模', '拟', '人', '类', '智', '慧', '的', '技', '术', '。', '它', '能', '学', '习', '、', '推', '理'] : ['AI', 'is', 'a', 'tech', 'that', 'simulates', 'human', 'intelligence', '.', 'It', 'can', 'learn', ',', 'reason', ',', 'plan', 'and', 'create', '.'],
+          t: 0.6,
+          currentStep: 0,
+          maskedPositions: new Set(),
+          predictions: {},
+          ceValues: {}
+        };
+        
+        let trainTimer = null;
+        
+        // 随机生成 mask 位置
+        function generateMaskPositions(t) {
+          const n = trainState.assistantTokens.length;
+          const numMask = Math.round(t * n);
+          const positions = new Set();
+          const indices = Array.from({length: n}, (_, i) => i);
+          
+          // 打乱顺序
+          for (let i = indices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [indices[i], indices[j]] = [indices[j], indices[i]];
+          }
+          
+          for (let i = 0; i < numMask; i++) {
+            positions.add(indices[i]);
+          }
+          
+          return positions;
+        }
+        
+        // 生成模拟的预测和 CE 值
+        const wrongPool_zh = ['的', '了', '在', '有', '和', '是', '不', '这', '也', '与', '为', '对', '中', '到', '说', '要', '就', '都', '而', '及', '能', '会', '上', '下', '之', '被', '将', '从', '以'];
+        const wrongPool_en = ['the', 'a', 'is', 'are', 'was', 'be', 'to', 'of', 'and', 'in', 'it', 'for', 'on', 'with', 'as', 'at', 'by', 'from', 'or', 'an'];
+        function getWrongPool() { return L() === 'zh' ? wrongPool_zh : wrongPool_en; }
+        
+        function generatePredictions() {
+          trainState.predictions = {};
+          trainState.ceValues = {};
+          
+          for (const pos of trainState.maskedPositions) {
+            const correct = trainState.assistantTokens[pos];
+            const isCorrect = Math.random() > 0.2;
+            if (isCorrect) {
+              trainState.predictions[pos] = correct;
+              trainState.ceValues[pos] = 0.1 + Math.random() * 0.3;
+            } else {
+              const wp = getWrongPool();
+              let wrong = wp[Math.floor(Math.random() * wp.length)];
+              while (wrong === correct) wrong = wp[Math.floor(Math.random() * wp.length)];
+              trainState.predictions[pos] = wrong;
+              trainState.ceValues[pos] = 1.5 + Math.random() * 1.0;
+            }
+          }
+        }
+        
+        function randomizeMask() {
+          // 更新 token 数据以匹配当前语言
+          trainState.promptTokens = L() === 'zh' ? ['请', '用', '一', '段', '话', '介', '绍', 'AI'] : ['Please', 'describe', 'AI', 'in', 'one', 'paragraph'];
+          trainState.assistantTokens = L() === 'zh' ? ['人', '工', '智', '能', '是', '一', '种', '模', '拟', '人', '类', '智', '慧', '的', '技', '术', '。', '它', '能', '学', '习', '、', '推', '理'] : ['AI', 'is', 'a', 'tech', 'that', 'simulates', 'human', 'intelligence', '.', 'It', 'can', 'learn', ',', 'reason', ',', 'plan', 'and', 'create', '.'];
+          trainState.maskedPositions = generateMaskPositions(trainState.t);
+          generatePredictions();
+          renderTraining();
+        }
+        
+        function updateTraining() {
+          const slider = document.getElementById('train-t');
+          trainState.t = parseInt(slider.value) / 100;
+          document.getElementById('train-t-value').textContent = trainState.t.toFixed(2);
+          
+          // 更新 token 数据以匹配当前语言
+          trainState.promptTokens = L() === 'zh' ? ['请', '用', '一', '段', '话', '介', '绍', 'AI'] : ['Please', 'describe', 'AI', 'in', 'one', 'paragraph'];
+          trainState.assistantTokens = L() === 'zh' ? ['人', '工', '智', '能', '是', '一', '种', '模', '拟', '人', '类', '智', '慧', '的', '技', '术', '。', '它', '能', '学', '习', '、', '推', '理'] : ['AI', 'is', 'a', 'tech', 'that', 'simulates', 'human', 'intelligence', '.', 'It', 'can', 'learn', ',', 'reason', ',', 'plan', 'and', 'create', '.'];
+          trainState.maskedPositions = generateMaskPositions(trainState.t);
+          generatePredictions();
+          renderTraining();
+        }
+        
+        function setTrainStep(step) {
+          trainState.currentStep = step;
+          
+          // 更新按钮状态
+          for (let i = 0; i < 4; i++) {
+            document.getElementById(`train-step-${i}`).classList.toggle('active', i === step);
+          }
+          
+          renderTraining();
+        }
+        
+        function renderTraining() {
+          const { promptTokens, assistantTokens, t, currentStep, maskedPositions, predictions, ceValues } = trainState;
+          
+          document.getElementById('stat-t').textContent = t.toFixed(2);
+          document.getElementById('stat-mask-count').textContent = maskedPositions.size;
+          document.getElementById('stat-p-mask').textContent = t.toFixed(2);
+          
+          const showTwoRows = currentStep >= 2;
+          const rowStyle = 'display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-bottom: 6px;';
+          const labelStyle = 'font-size: 10px; color: var(--text-3); font-weight: 600; min-width: 40px; text-align: right; margin-right: 8px;';
+          
+          let html = '';
+          
+          // Row 1: GT（仅在 step>=2 显示）
+          if (showTwoRows) {
+            html += `<div style="${rowStyle}"><span style="${labelStyle}">GT</span>`;
+            for (const tok of promptTokens) {
+              html += `<span class="anim-token prompt" style="opacity: 0.4; font-size: 10px;">${tok}</span>`;
+            }
+            for (let i = 0; i < assistantTokens.length; i++) {
+              const tok = assistantTokens[i];
+              const isMasked = maskedPositions.has(i);
+              if (isMasked) {
+                const pred = predictions[i];
+                const isCorrect = pred === tok;
+                const bg = isCorrect ? '#e8f5e9' : '#ffebee';
+                const border = isCorrect ? '#a5d6a7' : '#ef9a9a';
+                html += `<span class="anim-token" style="background: ${bg}; color: var(--text); border-color: ${border};">${tok}</span>`;
+              } else {
+                html += `<span class="anim-token" style="opacity: 0.3;">${tok}</span>`;
+              }
+            }
+            html += '</div>';
+          }
+          
+          // Row 2: 输入 / 预测
+          html += `<div style="${rowStyle}"><span style="${labelStyle}">${showTwoRows ? (currentStep === 2 ? (L() === 'zh' ? '预测' : 'Pred') : (L() === 'zh' ? '输入' : 'Input')) : ''}</span>`;
+          for (const tok of promptTokens) {
+            html += `<span class="anim-token prompt">${tok}</span>`;
+          }
+          for (let i = 0; i < assistantTokens.length; i++) {
+            const tok = assistantTokens[i];
+            const isMasked = maskedPositions.has(i);
+            let cls = 'done', display = tok;
+            
+            if (currentStep === 0) {
+              cls = 'done'; display = tok;
+            } else if (currentStep === 1) {
+              cls = isMasked ? 'mask' : 'done';
+              display = isMasked ? 'M' : tok;
+            } else if (currentStep === 2) {
+              if (isMasked) {
+                const pred = predictions[i];
+                cls = pred === tok ? 'reveal' : 'mask';
+                display = pred;
+              }
+            } else if (currentStep === 3) {
+              if (isMasked) {
+                const ce = ceValues[i];
+                cls = ce < 0.5 ? 'reveal' : 'mask';
+                display = tok;
+              }
+            }
+            const mark = (showTwoRows && isMasked) ? (predictions[i] === tok ? '<span style="color:var(--reveal-text);font-size:9px;">✓</span>' : '<span style="color:var(--error-text);font-size:9px;">✗</span>') : '';
+            html += `<span class="anim-token ${cls}" title="pos ${i}" style="position:relative;">${display}${mark ? '<sub style="position:absolute;bottom:-2px;right:-2px;">'+mark+'</sub>' : ''}</span>`;
+          }
+          html += '</div>';
+          document.getElementById('train-token-display').innerHTML = html;
+          
+          const statusTexts = L() === 'zh' ? ['原始完整序列', `随机 mask (t=${t.toFixed(2)})`, '模型预测 vs GT 对比', 'loss 计算'] : ['Original sequence', `Random mask (t=${t.toFixed(2)})`, 'Prediction vs GT', 'Loss computation'];
+          document.getElementById('train-status').textContent = statusTexts[currentStep];
+          
+          // loss 列表
+          let lossHtml = '';
+          let summaryHtml = '';
+          if (currentStep >= 2 && maskedPositions.size > 0) {
+            const maskedList = Array.from(maskedPositions).sort((a, b) => a - b);
+            const ceSum = Object.values(ceValues).reduce((a, b) => a + b, 0);
+            const weightedLoss = t > 0 ? ceSum / t : 0;
+            
+            lossHtml = '<table style="width: 100%; border-collapse: collapse; font-size: 12px;">';
+            lossHtml += '<thead><tr style="border-bottom: 1px solid var(--line); font-weight: 600; color: var(--text);">';
+            lossHtml += '<th style="padding: 4px 6px; text-align: left;">pos</th>';
+            lossHtml += L() === 'zh' ? '<th style="padding: 4px 6px; text-align: left;">GT</th>' : '<th style="padding: 4px 6px; text-align: left;">GT</th>';
+            lossHtml += L() === 'zh' ? '<th style="padding: 4px 6px; text-align: left;">预测</th>' : '<th style="padding: 4px 6px; text-align: left;">Pred</th>';
+            lossHtml += L() === 'zh' ? '<th style="padding: 4px 6px; text-align: center;">正确</th>' : '<th style="padding: 4px 6px; text-align: center;">Correct</th>';
+            lossHtml += '<th style="padding: 4px 6px; text-align: right;">CE</th>';
+            lossHtml += '<th style="padding: 4px 6px; text-align: right;">CE/p<sub>mask</sub></th>';
+            lossHtml += '</tr></thead><tbody>';
+            
+            for (const pos of maskedList) {
+              const tok = assistantTokens[pos];
+              const pred = predictions[pos];
+              const isCorrect = pred === tok;
+              const ce = ceValues[pos];
+              const weighted = ce / t;
+              const rowBg = isCorrect ? 'var(--reveal)' : 'var(--mask)';
+              lossHtml += `<tr style="background: ${rowBg}; border-bottom: 1px solid var(--line);">`;
+              lossHtml += `<td style="padding: 4px 6px; font-family: monospace;">${pos}</td>`;
+              lossHtml += `<td style="padding: 4px 6px; font-weight: 600;">${tok}</td>`;
+              lossHtml += `<td style="padding: 4px 6px; font-weight: 600; color: ${isCorrect ? 'var(--reveal-text)' : 'var(--error-text)'};">${pred}</td>`;
+              lossHtml += `<td style="padding: 4px 6px; text-align: center; color: ${isCorrect ? 'var(--reveal-text)' : 'var(--error-text)'}; font-weight: 700;">${isCorrect ? '✓' : '✗'}</td>`;
+              lossHtml += `<td style="padding: 4px 6px; text-align: right; font-family: monospace;">${ce.toFixed(3)}</td>`;
+              lossHtml += `<td style="padding: 4px 6px; text-align: right; font-family: monospace;">${weighted.toFixed(3)}</td>`;
+              lossHtml += '</tr>';
+            }
+            
+            lossHtml += `<tr style="border-top: 2px solid var(--line-strong); font-weight: 700;">`;
+            lossHtml += L() === 'zh' ? `<td colspan="4" style="padding: 6px;">合计（${maskedList.length} 个 mask 位置）</td>` : `<td colspan="4" style="padding: 6px;">Total (${maskedList.length} masked)</td>`;
+            lossHtml += `<td style="padding: 6px; text-align: right; font-family: monospace;">${ceSum.toFixed(3)}</td>`;
+            lossHtml += `<td style="padding: 6px; text-align: right; font-family: monospace;">${weightedLoss.toFixed(3)}</td>`;
+            lossHtml += '</tr></tbody></table>';
+            
+            summaryHtml = L() === 'zh' ? `loss = ${ceSum.toFixed(2)} / ${t.toFixed(2)} = <strong>${weightedLoss.toFixed(2)}</strong>` : `loss = ${ceSum.toFixed(2)} / ${t.toFixed(2)} = <strong>${weightedLoss.toFixed(2)}</strong>`;
+            
+            document.getElementById('stat-ce-sum').textContent = ceSum.toFixed(2);
+            document.getElementById('stat-weighted-loss').textContent = weightedLoss.toFixed(2);
+          } else if (currentStep < 2) {
+            lossHtml = L() === 'zh' ? '<span style="color: var(--text-3);">请先进入 “模型预测” 或 “loss 计算” 步骤</span>' : '<span style="color: var(--text-3);">Switch to “Predict” or “Loss” step first</span>';
+            document.getElementById('stat-ce-sum').textContent = '-';
+            document.getElementById('stat-weighted-loss').textContent = '-';
+          }
+          document.getElementById('train-loss-detail').innerHTML = lossHtml;
+          document.getElementById('train-loss-summary').innerHTML = summaryHtml;
+          
+          const explanations = L() === 'zh' ? [
+            `<strong>原始序列：</strong>训练数据包含 prompt（${promptTokens.length} 个 token）和 assistant（${assistantTokens.length} 个 token）。训练时只在 assistant 区域做 mask。`,
+            `<strong>随机 mask：</strong>采样 t = ${t.toFixed(2)}，将 assistant 区域的 ${maskedPositions.size} 个位置（${Math.round(t * 100)}%）随机替换为 MASK（红色）。Prompt 区域保持不变，未被 mask 的位置保留原始词元。`,
+            `<strong>模型预测 vs GT：</strong>上方为 GT（Ground Truth），下方为模型预测。绿色 ✓ 表示预测正确，红色 ✗ 表示预测错误。非 mask 位置半透明显示。`,
+            `<strong>loss 计算：</strong>只在 MASK 位置计算交叉熵（CE），然后除以 p_mask = ${t.toFixed(2)} 进行重加权。绿色行=预测正确（CE 低），红色行=预测错误（CE 高）。`
+          ] : [
+            `<strong>Original sequence:</strong> Training data contains prompt (${promptTokens.length} tokens) and assistant (${assistantTokens.length} tokens). Only assistant region is masked during training.`,
+            `<strong>Random mask:</strong> Sample t = ${t.toFixed(2)}, mask ${maskedPositions.size} positions (${Math.round(t * 100)}%) in assistant region (red). Prompt stays intact; unmasked positions keep original tokens.`,
+            `<strong>Prediction vs GT:</strong> Top row is GT (Ground Truth), bottom is model prediction. Green ✓ = correct, red ✗ = wrong. Unmasked positions shown semi-transparent.`,
+            `<strong>Loss computation:</strong> Cross-entropy (CE) computed only at MASK positions, then divided by p_mask = ${t.toFixed(2)} for reweighting. Green rows = correct (low CE), red rows = wrong (high CE).`
+          ];
+          document.getElementById('train-explanation').innerHTML = explanations[currentStep];
+        }
+        
+        function playTraining() {
+          const btn = document.getElementById('train-play-btn');
+          if (trainTimer) {
+            clearInterval(trainTimer);
+            trainTimer = null;
+            btn.textContent = L() === 'zh' ? '▶ 播放' : '▶ Play';
+            return;
+          }
+          
+          trainState.currentStep = 0;
+          setTrainStep(0);
+          btn.textContent = L() === 'zh' ? '⏸ 暂停' : '⏸ Pause';
+          
+          trainTimer = setInterval(() => {
+            trainState.currentStep++;
+            if (trainState.currentStep > 3) {
+              clearInterval(trainTimer);
+              trainTimer = null;
+              btn.textContent = L() === 'zh' ? '▶ 播放' : '▶ Play';
+              return;
+            }
+            setTrainStep(trainState.currentStep);
+          }, 2000);
+        }
+        
+        // 初始化
+        randomizeMask();
+      </script>
+      
+      <h3 style="margin-top: 28px;"><span class="zh">加权损失公式</span><span class="en">Weighted Loss Formula</span></h3>
+      <div class="formula">L = E<sub>t</sub> [ Σ<sub>i∈masked</sub> (1 / p<sub>mask</sub>) · CE(f<sub>θ</sub>(x<sub>t</sub>)<sub>i</sub>, x<sub>0</sub><sup>(i)</sup>) ] / N<sub>valid</sub></div>
+      <p class="lead" style="margin-top: 18px;">
+        <span class="zh">除以 p<sub>mask</sub> 的目的是平衡不同 t 下的梯度贡献：t 较小时被 mask 的位置少但每个位置更关键，t 较大时反之。</span>
+        <span class="en">Dividing by p<sub>mask</sub> balances gradient contributions across different t: when t is small, fewer masks but each position matters more; when t is large, more masks but each should carry less weight.</span>
+      </p>
+      <div class="codeblock">loss = F.cross_entropy(logits, labels, reduction='none')
+loss = (loss[corruption_mask] / p_mask[corruption_mask]).sum() / n_valid</div>
+
+      <h3 style="margin-top: 28px;"><span class="zh">训练数据格式</span><span class="en">Training Data Format</span></h3>
+      <div class="codeblock"><span class="zh">input_ids: [&lt;user&gt;] [你好] [&lt;assistant&gt;] [我是] [AI] [助手] [&lt;pad&gt;] [&lt;pad&gt;]
+labels:    [-100]  [-100] [-100]         [我是] [AI] [助手] [-100]  [-100]
+                                         ↑ 只有这些位置参与训练 ↑</span><span class="en">input_ids: [&lt;user&gt;] [Hello] [&lt;assistant&gt;] [I] [am] [AI] [&lt;pad&gt;] [&lt;pad&gt;]
+labels:    [-100]  [-100]  [-100]          [I] [am] [AI] [-100]  [-100]
+                                           ↑ only these positions are trained ↑</span></div>
+
+      <table style="margin-top: 22px;">
+        <thead>
+          <tr>
+            <th></th>
+            <th><span class="zh">训练</span><span class="en">Training</span></th>
+            <th><span class="zh">推理</span><span class="en">Inference</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="zh">步数</span><span class="en">Steps</span></td>
+            <td><span class="zh">1 步 forward</span><span class="en">1 forward</span></td>
+            <td><span class="zh">多步迭代（steps × blocks）</span><span class="en">Multi-step (steps × blocks)</span></td>
+          </tr>
+          <tr>
+            <td>mask</td>
+            <td><span class="zh">随机比例（t 控制）</span><span class="en">Random ratio (t-controlled)</span></td>
+            <td><span class="zh">全 MASK → 按置信度逐步揭示</span><span class="en">Full MASK → reveal by confidence</span></td>
+          </tr>
+          <tr>
+            <td><span class="zh">本质</span><span class="en">Essence</span></td>
+            <td><span class="zh">看到部分信息预测全部</span><span class="en">Predict all from partial info</span></td>
+            <td><span class="zh">多步迭代逐步补全</span><span class="en">Iterative step-by-step completion</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="inference">
+      <h2><span class="zh">推理：从全掩码到逐步揭示</span><span class="en">Inference: From Full Mask to Gradual Reveal</span></h2>
+      <p class="lead">
+        <span class="zh">dLM 的推理本质上是一个迭代去噪过程：将生成区初始化为全 MASK 序列，然后按置信度逐步揭示词元。</span>
+        <span class="en">DLLM inference is an iterative denoising process: initialize a fully masked sequence, then gradually reveal tokens by confidence.</span>
+      </p>
+
+      <div class="figure" style="margin-bottom: 22px;">
+        <h3 style="margin-bottom: 16px;"><span class="zh">初始化画布</span><span class="en">Initialize Canvas</span></h3>
+        <div class="token-row">
+          <span class="token prompt">Q</span>
+          <span class="token prompt">Q</span>
+          <span class="token prompt">Q</span>
+          <span class="token prompt">Q</span>
+          <span class="token prompt">Q</span>
+          <span class="arrow">|</span>
+          <span class="token mask">M</span>
+          <span class="token mask">M</span>
+          <span class="token mask">M</span>
+          <span class="token mask">M</span>
+          <span class="token mask">M</span>
+          <span class="token mask">M</span>
+          <span class="token mask">M</span>
+          <span class="token mask">M</span>
+        </div>
+        <div class="caption"><span class="zh">Prompt 区保持不变，生成区初始化为全 MASK。</span><span class="en">Prompt region stays fixed; generation region initialized as fully masked.</span></div>
+      </div>
+
+      <div class="animation-demo" id="inference-simulator">
+        <h3><span class="zh">交互式推理模拟器</span><span class="en">Interactive Inference Simulator</span></h3>
+        
+        <!-- 参数设置 -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; padding: 16px; background: var(--panel-2); border: 1px solid var(--line);">
+          <div>
+            <label style="font-size: 11px; color: var(--text-3); display: block; margin-bottom: 4px;">max_new_tokens</label>
+            <input type="number" id="param-tokens" value="32" min="4" max="48" style="width: 100%; padding: 6px 8px; border: 1px solid var(--line); font-size: 13px;" onchange="resetSimulation()">
+          </div>
+          <div>
+            <label style="font-size: 11px; color: var(--text-3); display: block; margin-bottom: 4px;">block_size</label>
+            <input type="number" id="param-block" value="8" min="1" max="32" style="width: 100%; padding: 6px 8px; border: 1px solid var(--line); font-size: 13px;" onchange="resetSimulation()">
+          </div>
+          <div>
+            <label style="font-size: 11px; color: var(--text-3); display: block; margin-bottom: 4px;">steps_per_block</label>
+            <input type="number" id="param-steps" value="4" min="1" max="16" style="width: 100%; padding: 6px 8px; border: 1px solid var(--line); font-size: 13px;" onchange="resetSimulation()">
+          </div>
+          <div>
+            <label style="font-size: 11px; color: var(--text-3); display: block; margin-bottom: 4px;"><span class="zh">操作</span><span class="en">Actions</span></label>
+            <button onclick="resetSimulation()" style="width: 100%; padding: 6px 8px; border: 1px solid var(--line); background: var(--panel-2); cursor: pointer; font-size: 13px; color: var(--text); border-color: var(--line-strong);"><span class="zh">重置</span><span class="en">Reset</span></button>
+          </div>
+        </div>
+        
+        <!-- 进度条 -->
+        <div style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); margin-bottom: 6px;">
+            <span>Step <span id="current-step">0</span> / <span id="total-steps">0</span></span>
+            <span>Block <span id="current-block">0</span> / <span id="total-blocks">0</span></span>
+          </div>
+          <input type="range" id="step-slider" min="0" max="100" value="0" style="width: 100%; cursor: pointer;" oninput="onSliderChange(this.value)">
+          <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+            <button onclick="prevStep()" style="padding: 4px 12px; border: 1px solid var(--line); background: var(--panel-2); cursor: pointer; font-size: 12px; color: var(--text); border-color: var(--line-strong);"><span class="zh">← 上一步</span><span class="en">← Prev</span></button>
+            <button onclick="togglePlay()" id="play-btn" style="padding: 4px 16px; border: 1px solid var(--accent); background: var(--accent); color: var(--bg); cursor: pointer; font-size: 12px;">▶ Play</button>
+            <button onclick="nextStep()" style="padding: 4px 12px; border: 1px solid var(--line); background: var(--panel-2); cursor: pointer; font-size: 12px; color: var(--text); border-color: var(--line-strong);"><span class="zh">下一步 →</span><span class="en">Next →</span></button>
+          </div>
+        </div>
+        
+        <!-- 序列展示 -->
+        <div style="padding: 16px; background: var(--panel); border: 1px solid var(--line); margin-bottom: 12px;">
+          <div style="font-size: 11px; color: var(--text-3); margin-bottom: 8px;"><span class="zh">Prompt + 生成区</span><span class="en">Prompt + Generation</span></div>
+          <div id="token-display" style="display: flex; flex-wrap: wrap; gap: 4px;"></div>
+        </div>
+        
+        <!-- 置信度排序 -->
+        <div style="padding: 12px; background: var(--panel-2); border: 1px solid var(--line); margin-bottom: 12px;">
+          <div style="font-size: 11px; color: var(--text-3); margin-bottom: 8px;"><span class="zh">本步置信度排序（模拟）</span><span class="en">Confidence ranking this step (simulated)</span></div>
+          <div id="confidence-display" style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px;"></div>
+        </div>
+        
+        <!-- 说明 -->
+        <div id="step-explanation" style="padding: 14px; background: var(--panel-2); border: 1px solid var(--line); font-size: 13px; color: var(--text-2); line-height: 1.6;"></div>
+        
+        <!-- 统计 -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 12px; font-size: 12px;">
+          <div style="padding: 10px; background: var(--panel); border: 1px solid var(--line); text-align: center;">
+            <div style="color: var(--text-3); font-size: 10px;"><span class="zh">已揭示</span><span class="en">Revealed</span></div>
+            <div id="stat-revealed" style="font-size: 18px; font-weight: 600; color: var(--accent);">0</div>
+          </div>
+          <div style="padding: 10px; background: var(--panel); border: 1px solid var(--line); text-align: center;">
+            <div style="color: var(--text-3); font-size: 10px;"><span class="zh">剩余 MASK</span><span class="en">Remaining</span></div>
+            <div id="stat-remaining" style="font-size: 18px; font-weight: 600; color: var(--text);">0</div>
+          </div>
+          <div style="padding: 10px; background: var(--panel); border: 1px solid var(--line); text-align: center;">
+            <div style="color: var(--text-3); font-size: 10px;"><span class="zh">本步揭示</span><span class="en">This step</span></div>
+            <div id="stat-this-step" style="font-size: 18px; font-weight: 600; color: var(--accent-2);">0</div>
+          </div>
+          <div style="padding: 10px; background: var(--panel); border: 1px solid var(--line); text-align: center;">
+            <div style="color: var(--text-3); font-size: 10px;"><span class="zh">总 forward 次数</span><span class="en">Total forwards</span></div>
+            <div id="stat-forwards" style="font-size: 18px; font-weight: 600; color: var(--text);">0</div>
+          </div>
+        </div>
+        
+        <div class="caption"><span class="zh">调整参数后点击重置，拖动进度条或点击按钮控制推理过程。每步揭示数量 = ceil(剩余 MASK / 剩余步数)。</span><span class="en">Adjust parameters then click Reset. Drag slider or click buttons to control inference. Tokens per step = ceil(remaining MASK / remaining steps).</span></div>
+      </div>
+      
+      <script>
+        // 模拟的目标序列（用于展示）
+        const targetTokens_zh = ['人', '工', '智', '能', '是', '一', '种', '模', '拟', '人', '类', '智', '慧', '的', '技', '术', '。', '它', '能', '处', '学', '习', '、', '推', '理', '、', '规', '划', '和', '创', '造', '。', '在', '医', '疗', '、', '金', '融', '、', '教', '育', '等', '领', '域', '广', '泛', '应', '用'];
+        const targetTokens_en = ['AI', 'is', 'a', 'technology', 'that', 'simulates', 'human', 'intelligence', '.', 'It', 'can', 'learn', ',', 'reason', ',', 'plan', ',', 'and', 'create', '.', 'It', 'is', 'widely', 'used', 'in', 'healthcare', ',', 'finance', ',', 'education', 'and', 'more', '.'];
+        const promptTokens_zh = ['请', '用', '一', '段', '话', '介', '绍', 'AI'];
+        const promptTokens_en = ['Please', 'describe', 'AI', 'in', 'one', 'paragraph'];
+        function getTargetTokens() { return L() === 'zh' ? targetTokens_zh : targetTokens_en; }
+        function getPromptTokens() { return L() === 'zh' ? promptTokens_zh : promptTokens_en; }
+        
+        // 模拟状态
+        let simState = {
+          maxTokens: 32,
+          blockSize: 8,
+          stepsPerBlock: 4,
+          currentStep: 0,
+          totalSteps: 0,
+          revealedPositions: new Set(),
+          stepHistory: [],
+          confidenceOrder: []
+        };
+        
+        let playTimer = null;
+        
+        // 生成模拟的置信度排序（首尾优先 + 随机扰动）
+        function generateConfidenceOrder(n) {
+          const order = [];
+          const indices = Array.from({length: n}, (_, i) => i);
+          
+          // 首尾优先模式：第一个和最后一个位置置信度最高
+          if (n > 0) order.push(0);
+          if (n > 1) order.push(n - 1);
+          
+          // 剩余位置按"中间向外"的模式
+          const remaining = indices.filter(i => !order.includes(i));
+          // 添加一些随机性
+          for (let i = remaining.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * 0.3 * i);
+            [remaining[i], remaining[j]] = [remaining[j], remaining[i]];
+          }
+          order.push(...remaining);
+          
+          return order;
+        }
+        
+        // 计算每步揭示哪些位置
+        function computeStepHistory() {
+          const { maxTokens, blockSize, stepsPerBlock } = simState;
+          const numBlocks = Math.ceil(maxTokens / blockSize);
+          const history = [{ revealed: [], cumulative: new Set(), block: 0, stepInBlock: 0 }];
+          
+          let globalRevealed = new Set();
+          
+          for (let b = 0; b < numBlocks; b++) {
+            const blockStart = b * blockSize;
+            const blockEnd = Math.min(blockStart + blockSize, maxTokens);
+            const blockLen = blockEnd - blockStart;
+            
+            // 这个 block 内的置信度排序
+            const blockOrder = generateConfidenceOrder(blockLen).map(i => blockStart + i);
+            
+            let blockRevealed = new Set();
+            
+            for (let s = 0; s < stepsPerBlock; s++) {
+              const remaining = blockLen - blockRevealed.size;
+              const remainingSteps = stepsPerBlock - s;
+              const toReveal = Math.ceil(remaining / remainingSteps);
+              
+              const thisStepRevealed = [];
+              for (const pos of blockOrder) {
+                if (!blockRevealed.has(pos) && thisStepRevealed.length < toReveal) {
+                  thisStepRevealed.push(pos);
+                  blockRevealed.add(pos);
+                  globalRevealed.add(pos);
+                }
+              }
+              
+              history.push({
+                revealed: thisStepRevealed,
+                cumulative: new Set(globalRevealed),
+                block: b,
+                stepInBlock: s,
+                blockOrder: [...blockOrder]
+              });
+            }
+          }
+          
+          return history;
+        }
+        
+        function resetSimulation() {
+          simState.maxTokens = parseInt(document.getElementById('param-tokens').value) || 16;
+          simState.blockSize = parseInt(document.getElementById('param-block').value) || 8;
+          simState.stepsPerBlock = parseInt(document.getElementById('param-steps').value) || 4;
+          
+          simState.confidenceOrder = generateConfidenceOrder(simState.maxTokens);
+          simState.stepHistory = computeStepHistory();
+          simState.totalSteps = simState.stepHistory.length - 1;
+          simState.currentStep = 0;
+          
+          // 更新 slider
+          const slider = document.getElementById('step-slider');
+          slider.max = simState.totalSteps;
+          slider.value = 0;
+          
+          document.getElementById('total-steps').textContent = simState.totalSteps;
+          document.getElementById('total-blocks').textContent = Math.ceil(simState.maxTokens / simState.blockSize);
+          
+          renderStep(0);
+        }
+        
+        function renderStep(stepIndex) {
+          const step = simState.stepHistory[stepIndex];
+          const { maxTokens } = simState;
+          
+          // 更新当前步数
+          document.getElementById('current-step').textContent = stepIndex;
+          document.getElementById('current-block').textContent = step.block + 1;
+          document.getElementById('step-slider').value = stepIndex;
+          
+          // 渲染 token 序列
+          let tokenHtml = '';
+          // Prompt
+          for (const t of getPromptTokens()) {
+            tokenHtml += `<span class="anim-token prompt">${t}</span>`;
+          }
+          // Generation（按 block 分组，加分隔符）
+          const numBlocks = Math.ceil(maxTokens / simState.blockSize);
+          for (let b = 0; b < numBlocks; b++) {
+            const bStart = b * simState.blockSize;
+            const bEnd = Math.min(bStart + simState.blockSize, maxTokens);
+            const isActiveBlock = (step.block === b && stepIndex > 0);
+            
+            // block 分隔符
+            if (b > 0) {
+              tokenHtml += `<span style="width: 2px; height: 28px; background: var(--line-strong); margin: 0 2px;"></span>`;
+            }
+            // block 标签
+            tokenHtml += `<span style="font-size: 9px; color: ${isActiveBlock ? 'var(--accent)' : 'var(--text-3)'}; writing-mode: vertical-lr; margin-right: -2px; font-weight: ${isActiveBlock ? '700' : '400'};">B${b+1}</span>`;
+            
+            for (let i = bStart; i < bEnd; i++) {
+              const token = getTargetTokens()[i] || '□';
+              let cls = 'mask';
+              let display = 'M';
+              
+              if (step.cumulative.has(i)) {
+                if (step.revealed.includes(i)) {
+                  cls = 'reveal';
+                } else {
+                  cls = 'done';
+                }
+                display = token;
+              }
+              
+              const border = isActiveBlock ? 'border-bottom: 2px solid var(--accent);' : '';
+              tokenHtml += `<span class="anim-token ${cls}" title="pos ${i} | Block ${b+1}" style="${border}">${display}</span>`;
+            }
+          }
+          document.getElementById('token-display').innerHTML = tokenHtml;
+          
+          // 渲染置信度排序（按实际 blockOrder 顺序）
+          let confHtml = '';
+          if (stepIndex > 0 && step.blockOrder && step.blockOrder.length > 0) {
+            const prevCumulative = simState.stepHistory[stepIndex - 1].cumulative;
+            // blockOrder 已经是按置信度从高到低排序的
+            const sortedByConf = step.blockOrder.filter(p => !prevCumulative.has(p));
+            const totalInList = sortedByConf.length;
+            
+            sortedByConf.forEach((pos, idx) => {
+              const isRevealed = step.revealed.includes(pos);
+              const token = getTargetTokens()[pos] || '□';
+              const conf = Math.max(0.1, 1 - idx / totalInList).toFixed(2);
+              const bg = isRevealed ? 'var(--done)' : 'var(--panel)';
+              const fg = isRevealed ? '#e0e0e0' : 'var(--text)';
+              const border = isRevealed ? 'var(--done)' : 'var(--line)';
+              confHtml += `<span style="padding: 4px 8px; background: ${bg}; color: ${fg}; border: 1px solid ${border};">`;
+              confHtml += `${token}<sub style="font-size: 9px; opacity: 0.7;">pos${pos}</sub>`;
+              confHtml += `<span style="margin-left: 4px; font-size: 10px; opacity: 0.6;">${conf}</span>`;
+              if (isRevealed) confHtml += `<span style="margin-left: 2px; font-size: 9px;">✓</span>`;
+              confHtml += '</span>';
+            });
+          } else if (stepIndex === 0) {
+            confHtml = L() === 'zh' ? '<span style="color: var(--text-3);">尚未开始推理</span>' : '<span style="color: var(--text-3);">Inference not started</span>';
+          } else {
+            confHtml = L() === 'zh' ? '<span style="color: var(--text-3);">本步无新揭示</span>' : '<span style="color: var(--text-3);">No new reveals this step</span>';
+          }
+          document.getElementById('confidence-display').innerHTML = confHtml;
+          
+          // 更新统计
+          document.getElementById('stat-revealed').textContent = step.cumulative.size;
+          document.getElementById('stat-remaining').textContent = maxTokens - step.cumulative.size;
+          document.getElementById('stat-this-step').textContent = step.revealed.length;
+          document.getElementById('stat-forwards').textContent = stepIndex;
+          
+          // 更新说明
+          let explanation = '';
+          if (stepIndex === 0) {
+            explanation = L() === 'zh'
+              ? `<strong>初始状态：</strong>生成区初始化为 ${maxTokens} 个 MASK。共 ${Math.ceil(maxTokens / simState.blockSize)} 个 block，每个 block ${simState.stepsPerBlock} 步。`
+              : `<strong>Initial state:</strong> Generation region initialized with ${maxTokens} MASK tokens. ${Math.ceil(maxTokens / simState.blockSize)} blocks, ${simState.stepsPerBlock} steps per block.`;
+          } else {
+            const remaining = maxTokens - simState.stepHistory[stepIndex - 1].cumulative.size;
+            const remainingSteps = (Math.ceil(maxTokens / simState.blockSize) - step.block) * simState.stepsPerBlock - step.stepInBlock;
+            explanation = `<strong>Block ${step.block + 1} / Step ${step.stepInBlock + 1}：</strong>`;
+            explanation += L() === 'zh' ? `本步揭示 ${step.revealed.length} 个位置` : `Revealed ${step.revealed.length} positions this step`;
+            if (step.revealed.length > 0) {
+              explanation += `（${step.revealed.map(p => `pos${p}`).join(', ')}）`;
+            }
+            explanation += L() === 'zh' ? `。计算方式：ceil(${remaining} / ${simState.stepsPerBlock - step.stepInBlock}) = ${step.revealed.length}。` : `. Formula: ceil(${remaining} / ${simState.stepsPerBlock - step.stepInBlock}) = ${step.revealed.length}.`;
+          }
+          document.getElementById('step-explanation').innerHTML = explanation;
+        }
+        
+        function onSliderChange(value) {
+          simState.currentStep = parseInt(value);
+          renderStep(simState.currentStep);
+        }
+        
+        function prevStep() {
+          if (simState.currentStep > 0) {
+            simState.currentStep--;
+            renderStep(simState.currentStep);
+          }
+        }
+        
+        function nextStep() {
+          if (simState.currentStep < simState.totalSteps) {
+            simState.currentStep++;
+            renderStep(simState.currentStep);
+          }
+        }
+        
+        function togglePlay() {
+          const btn = document.getElementById('play-btn');
+          if (playTimer) {
+            clearInterval(playTimer);
+            playTimer = null;
+            btn.textContent = L() === 'zh' ? '▶ 播放' : '▶ Play';
+          } else {
+            if (simState.currentStep >= simState.totalSteps) {
+              simState.currentStep = 0;
+            }
+            btn.textContent = L() === 'zh' ? '⏸ 暂停' : '⏸ Pause';
+            playTimer = setInterval(() => {
+              if (simState.currentStep >= simState.totalSteps) {
+                clearInterval(playTimer);
+                playTimer = null;
+                btn.textContent = L() === 'zh' ? '▶ 播放' : '▶ Play';
+                return;
+              }
+              simState.currentStep++;
+              renderStep(simState.currentStep);
+            }, 1500);
+          }
+        }
+        
+        // 初始化
+        resetSimulation();
+      </script>
+      
+      <div class="figure">
+        <h3 style="margin-bottom: 16px;"><span class="zh">一个 block 的去噪过程（静态版）</span><span class="en">One Block Denoising Process (Static)</span></h3>
+        <div class="timeline" style="margin-bottom: 14px; align-items: flex-start;">
+          <div class="step-box" style="min-width: 100%;">
+            <h4><span class="zh">初始</span><span class="en">Initial</span></h4>
+            <div class="token-row">
+              <span class="token prompt">Prompt</span>
+              <span class="token mask">M</span><span class="token mask">M</span><span class="token mask">M</span><span class="token mask">M</span>
+              <span class="token mask">M</span><span class="token mask">M</span><span class="token mask">M</span><span class="token mask">M</span>
+            </div>
+          </div>
+          <div class="step-box" style="min-width: 100%;">
+            <h4><span class="zh">Step 1 — 全序列 forward → 置信度排序 → 揭示 top-k</span><span class="en">Step 1 — Full forward → confidence ranking → reveal top-k</span></h4>
+            <div class="token-row">
+              <span class="token prompt">Prompt</span>
+              <span class="token mask">M</span><span class="token reveal"><span class="zh">是</span><span class="en">is</span></span><span class="token mask">M</span><span class="token mask">M</span>
+              <span class="token mask">M</span><span class="token reveal"><span class="zh">助</span><span class="en">assis</span></span><span class="token mask">M</span><span class="token mask">M</span>
+            </div>
+          </div>
+          <div class="step-box" style="min-width: 100%;">
+            <h4><span class="zh">Step 2 — 再次 forward → 继续揭示高置信位置</span><span class="en">Step 2 — Forward again → reveal high-confidence positions</span></h4>
+            <div class="token-row">
+              <span class="token prompt">Prompt</span>
+              <span class="token reveal"><span class="zh">我</span><span class="en">I</span></span><span class="token done"><span class="zh">是</span><span class="en">is</span></span><span class="token mask">M</span><span class="token reveal"><span class="zh">能</span><span class="en">can</span></span>
+              <span class="token mask">M</span><span class="token done"><span class="zh">助</span><span class="en">assis</span></span><span class="token reveal"><span class="zh">手</span><span class="en">tant</span></span><span class="token mask">M</span>
+            </div>
+          </div>
+          <div class="step-box" style="min-width: 100%;">
+            <h4><span class="zh">Step 3 — 收敛完成</span><span class="en">Step 3 — Converged</span></h4>
+            <div class="token-row">
+              <span class="token prompt">Prompt</span>
+              <span class="token done"><span class="zh">我</span><span class="en">I</span></span><span class="token done"><span class="zh">是</span><span class="en">am</span></span><span class="token done"><span class="zh">智</span><span class="en">AI</span></span><span class="token done"><span class="zh">能</span><span class="en">assis</span></span>
+              <span class="token done"><span class="zh">的</span><span class="en">tant</span></span><span class="token done"><span class="zh">助</span><span class="en">.</span></span><span class="token done"><span class="zh">手</span><span class="en"></span></span><span class="token done"><span class="zh">。</span><span class="en"></span></span>
+            </div>
+          </div>
+        </div>
+        <div class="caption"><span class="zh">图 4. dLM 对同一位置反复预测，揭示顺序由置信度而非位置索引决定。</span><span class="en">Fig 4. DLLM predicts each position multiple times; reveal order is determined by confidence, not position index.</span></div>
+      </div>
+
+      <div class="note-grid" style="margin-top: 22px;">
+        <div class="small-note">
+          <strong><span class="zh">关键点 1</span><span class="en">Key Point 1</span></strong>
+          <p><span class="zh">每步揭示的词元数由 </span><code>remaining / remaining_steps</code><span class="zh"> 动态计算，而非固定常数。</span><span class="en">Tokens revealed per step = </span><code>remaining / remaining_steps</code><span class="en">, not a fixed top-k constant.</span></p>
+        </div>
+        <div class="small-note">
+          <strong><span class="zh">关键点 2</span><span class="en">Key Point 2</span></strong>
+          <p><span class="zh">每步均对全序列做前向传播，而非仅处理当前 block；双向注意力可利用全部已知上下文。</span><span class="en">Each step processes the full sequence, not just the current block; bidirectional attention leverages all known context.</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="zh">Block 并行：AR ↔ 全并行的连续旋钮</span><span class="en">Block Parallelism: AR ↔ Full Parallelism Continuum</span></h2>
+      <p class="lead">
+        <span class="zh">block_size 决定了 dLM 的行为更接近自回归还是并行去噪。它并非离散的模式开关，而是质量与速度之间的连续调控旋钮。</span>
+        <span class="en">block_size determines whether DLLM behaves more like AR or parallel denoising; it's not a discrete mode switch but a continuous knob between quality and speed.</span>
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>block_size</th>
+            <th><span class="zh">行为</span><span class="en">Behavior</span></th>
+            <th><span class="zh">速度 / 质量</span><span class="en">Speed / Quality</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>= max_new_tokens</td>
+            <td><span class="zh">全序列一次性去噪</span><span class="en">Global one-shot denoising</span></td>
+            <td><span class="zh">速度最快，质量取决于步数与采样策略</span><span class="en">Fastest; quality depends on steps & sampling</span></td>
+          </tr>
+          <tr>
+            <td>8 ~ 32</td>
+            <td><span class="zh">分块并行去噪</span><span class="en">Local block parallelism</span></td>
+            <td><span class="zh">工程实践中常用的折中方案</span><span class="en">Common engineering trade-off</span></td>
+          </tr>
+          <tr>
+            <td>= 1</td>
+            <td><span class="zh">退化为逐词元自回归</span><span class="en">Degenerates to AR</span></td>
+            <td><span class="zh">速度最慢，但最接近 AR 的严格顺序生成</span><span class="en">Slowest; closest to strict sequential generation</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="a2d">
+      <h2><span class="zh">A2D：从 AR 到 dLM 的两步转换</span><span class="en">A2D: Two-Step AR → DLLM Conversion</span></h2>
+      <div class="figure">
+        <div class="a2d-flow">
+          <div class="step-box">
+            <h4>AR Model</h4>
+            <p><span class="zh">已训练的 AR 权重</span><span class="en">Pretrained AR weights</span></p>
+          </div>
+          <div class="arrow">→</div>
+          <div class="step-box">
+            <h4><span class="zh">1. 关闭因果约束</span><span class="en">1. Disable causal mask</span></h4>
+            <div class="codeblock">is_causal=True → False</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="step-box">
+            <h4><span class="zh">2. 扩展词表</span><span class="en">2. Extend vocabulary</span></h4>
+            <div class="codeblock">vocab += [MASK]</div>
+          </div>
+          <div class="arrow">→</div>
+          <div class="step-box">
+            <h4>DLLM Model</h4>
+            <p><span class="zh">继承 AR 的全部语言知识，仅需微调</span><span class="en">Inherits all AR knowledge; fine-tune only</span></p>
+          </div>
+        </div>
+        <div class="caption"><span class="zh">图 5. A2D（AR-to-Diffusion）转换流程。</span><span class="en">Fig 5. A2D (AR-to-Diffusion) conversion path.</span></div>
+      </div>
+      <ul style="margin-top: 18px;">
+        <li><span class="zh">无需从零训练，AR 的语言知识可直接迁移。</span><span class="en">No training from scratch; AR knowledge transfers directly.</span></li>
+        <li><span class="zh">可采用冻结 FFN、仅调 Attention 的低成本微调策略。</span><span class="en">Low-cost fine-tuning: freeze FFN, tune attention only.</span></li>
+        <li><span class="zh">核心意义：任何开源 AR 模型理论上均可低成本地转化为 dLM。</span><span class="en">Implication: any open-source AR model can be converted to DLLM at low cost.</span></li>
+      </ul>
+    </section>
+
+    <section id="sampling">
+      <h2><span class="zh">采样与控制：Gumbel-Max、Top-k、CFG</span><span class="en">Sampling & Control: Gumbel-Max, Top-k, CFG</span></h2>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title"><span class="zh">Gumbel-Max 采样</span><span class="en">Gumbel-Max Sampling</span></div>
+          <p><span class="zh">相较 softmax + multinomial，Gumbel-Max 在低精度数值条件下更稳定，适用于推理阶段的离散采样。</span><span class="en">More stable than softmax + multinomial under low precision; ideal for discrete sampling during inference.</span></p>
+        </div>
+        <div class="card">
+          <div class="card-title">temperature</div>
+          <p><span class="zh">控制采样随机性：0 趋近贪心解码，1 为标准采样。过高则输出散乱，过低则重复。</span><span class="en">Controls sampling randomness: 0 → greedy, 1 → standard; too high → incoherent, too low → repetitive.</span></p>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="zh">Top-k 与 CFG</span><span class="en">Top-k & CFG</span></div>
+          <p><span class="zh">Top-k 截断长尾噪声；CFG 通过有条件与无条件两次前向传播的差值来增强 prompt 引导。</span><span class="en">Top-k truncates long-tail noise; CFG amplifies prompt constraint via conditional/unconditional forward difference.</span></p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 24px;">
+        <div>
+          <h3>Gumbel-Max</h3>
+          <div class="codeblock">def add_gumbel_noise(logits, temperature):
+    noise = torch.rand_like(logits, dtype=torch.float64)
+    return logits.exp() / ((-torch.log(noise)) ** temperature)</div>
+        </div>
+        <div>
+          <h3>CFG</h3>
+          <div class="formula">logits = logits<sub>uncond</sub> + (1 + s) · (logits<sub>cond</sub> - logits<sub>uncond</sub>)</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="compare">
+      <h2><span class="zh">AR 与 dLM 的系统对比</span><span class="en">AR vs DLLM: Fair Comparison</span></h2>
+      <table>
+        <thead>
+          <tr>
+            <th><span class="zh">维度</span><span class="en">Dimension</span></th>
+            <th>AR LM</th>
+            <th>Masked Diffusion LM</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="zh">注意力</span><span class="en">Attention</span></td>
+            <td><span class="zh">单向（causal）</span><span class="en">Unidirectional causal</span></td>
+            <td><span class="zh">双向（bidirectional）</span><span class="en">Bidirectional</span></td>
+          </tr>
+          <tr>
+            <td><span class="zh">生成顺序</span><span class="en">Generation order</span></td>
+            <td><span class="zh">从左到右，逐词元生成</span><span class="en">Left-to-right token by token</span></td>
+            <td><span class="zh">按置信度排序，优先填充最确定的位置</span><span class="en">By confidence; most certain first</span></td>
+          </tr>
+          <tr>
+            <td><span class="zh">训练目标</span><span class="en">Training objective</span></td>
+            <td>next-token prediction</td>
+            <td>masked-token prediction</td>
+          </tr>
+          <tr>
+            <td><span class="zh">推理步数</span><span class="en">Inference steps</span></td>
+            <td>O(N)</td>
+            <td><span class="zh">O(T)，由步数 × block 数决定</span><span class="en">O(T), fixed steps / block combination</span></td>
+          </tr>
+          <tr>
+            <td><span class="zh">编辑能力</span><span class="en">Editing capability</span></td>
+            <td><span class="zh">通常需额外机制支持</span><span class="en">Usually requires extra mechanisms</span></td>
+            <td><span class="zh">天然支持 infilling 与局部补全</span><span class="en">Native infilling / local completion</span></td>
+          </tr>
+          <tr>
+            <td><span class="zh">训练成本</span><span class="en">Training cost</span></td>
+            <td><span class="zh">一般需从零训练</span><span class="en">Usually from scratch</span></td>
+            <td><span class="zh">可从 AR 权重迁移</span><span class="en">Transferable from AR</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="lead" style="margin-top: 18px;">
+        <span class="zh">结论并非“dLM 已取代 AR”，而是：dLM 将语言生成从严格的顺序链式过程，扩展为可迭代、可全局重评估的推理过程。</span>
+        <span class="en">The conclusion is not “DLLM replaces AR”, but: DLLM extends language generation from a strict sequential chain into an iterative, globally re-evaluable inference process.</span>
+      </p>
+    </section>
+
+    <section id="tuning">
+      <h2><span class="zh">调参建议</span><span class="en">Tuning Guidelines</span></h2>
+      <div class="param-grid">
+        <div class="param-card">
+          <div class="param-name">block_size</div>
+          <div class="param-value">8–32</div>
+          <p><span class="zh">值越小越稳定但越慢，越大越快但对步数与采样策略更敏感。</span><span class="en">Smaller = slower but stabler; larger = faster but depends more on steps & sampling.</span></p>
+        </div>
+        <div class="param-card">
+          <div class="param-name">steps</div>
+          <div class="param-value">≥ block_size</div>
+          <p><span class="zh">步数过少会导致每步揭示过多，补全质量下降。</span><span class="en">Fewer tokens revealed per step; too few steps leads to coarse completion.</span></p>
+        </div>
+        <div class="param-card">
+          <div class="param-name">temperature</div>
+          <div class="param-value">0.2–0.8</div>
+          <p><span class="zh">过高则输出散乱，过低则重复；通常需与 top_k 联合调节。</span><span class="en">Too high = chaotic; too low = repetitive; usually tuned with top_k.</span></p>
+        </div>
+        <div class="param-card">
+          <div class="param-name">top_k</div>
+          <div class="param-value">20–100</div>
+          <p><span class="zh">截断候选词元空间，平衡多样性与生成稳定性。</span><span class="en">Controls candidate token space; affects diversity and stability.</span></p>
+        </div>
+        <div class="param-card">
+          <div class="param-name">cfg_scale</div>
+          <div class="param-value">0.5–2.0</div>
+          <p><span class="zh">增强对 prompt 的忠实度，但过高可能引发模式崩塌。</span><span class="en">Improves prompt fidelity; too high may cause mode collapse.</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="practice">
+      <h2><span class="zh">项目实践结构</span><span class="en">Project Structure</span></h2>
+      <div class="grid-2">
+        <div>
+          <h3><span class="zh">目录结构</span><span class="en">Directory Structure</span></h3>
+          <div class="codeblock"><span class="zh">dllm/
+├── model/model_qwen3_dllm.py     # 模型
+├── dataset/lm_dataset.py         # 数据集
+├── trainer/train_dllm.py         # 训练
+└── eval_dllm.py                  # 推理</span><span class="en">dllm/
+├── model/model_qwen3_dllm.py     # model
+├── dataset/lm_dataset.py         # dataset
+├── trainer/train_dllm.py         # training
+└── eval_dllm.py                  # inference</span></div>
+        </div>
+        <div>
+          <h3><span class="zh">训练 / 推理命令</span><span class="en">Training / Inference Commands</span></h3>
+          <div class="codeblock"><span class="zh"># 训练
+CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node 2 trainer/train_dllm.py \
+    --learning_rate 1e-4 --freeze_ffn --use_compile 1 --batch_size 16 --epochs 5
+
+# 推理
+python eval_dllm.py --block_size 8 --steps 16 --temperature 0.3 --top_k 50</span><span class="en"># Training
+CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node 2 trainer/train_dllm.py \
+    --learning_rate 1e-4 --freeze_ffn --use_compile 1 --batch_size 16 --epochs 5
+
+# Inference
+python eval_dllm.py --block_size 8 --steps 16 --temperature 0.3 --top_k 50</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="future">
+      <h2><span class="zh">开放问题与未来方向</span><span class="en">Open Problems & Future Directions</span></h2>
+      <div class="grid-4">
+        <div class="card">
+          <div class="card-title"><span class="zh">长文本 block 策略</span><span class="en">Long-text block strategy</span></div>
+          <p><span class="zh">如何使 block 边界语义化，而非简单的固定长度切分。</span><span class="en">How to make block boundaries more semantic rather than fixed-length.</span></p>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="zh">与 speculative decoding 结合</span><span class="en">Combine with speculative decoding</span></div>
+          <p><span class="zh">能否将 draft/verify 思路与多步去噪结合，进一步压缩推理开销。</span><span class="en">Can draft/verify be combined with multi-step denoising to reduce inference cost?</span></p>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="zh">多模态离散扩散</span><span class="en">Multimodal discrete diffusion</span></div>
+          <p><span class="zh">文本、图像、音频统一 token 化后，能否共享同一套扩散生成范式。</span><span class="en">Can text, image, audio share a unified diffusion paradigm after tokenization?</span></p>
+        </div>
+        <div class="card">
+          <div class="card-title"><span class="zh">训练效率</span><span class="en">Training efficiency</span></div>
+          <p><span class="zh">如何以更少的步数与掩码配置，逼近乃至追平 AR 的生成质量。</span><span class="en">How to match AR quality with fewer steps and mask configurations.</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2><span class="zh">总结</span><span class="en">Summary</span></h2>
+      <div class="figure">
+        <div class="formula" style="background: transparent; border: none; padding: 6px 0 12px;"><span class="zh">AR 基于链式分解逐词元生成；dLM 基于全局建模迭代揭示。</span><span class="en">AR generates token by token via chain decomposition; DLLM reveals iteratively via global modeling.</span></div>
+        <p class="lead" style="margin: 0 auto; text-align: center; max-width: 860px;">
+          <span class="zh">二者并非简单的替代关系：AR 强调顺序一致性，dLM 强调全局建模与迭代修正。</span>
+          <span class="en">They are not simple substitutes. AR emphasizes sequential consistency; DLLM emphasizes global modeling and iterative refinement.</span>
+        </p>
+      </div>
+    </section>
+
+    <section class="footer">
+      <h2><span class="zh">参考</span><span class="en">References</span></h2>
+      <ol class="references" style="padding-left: 22px; font-size: 14px; line-height: 1.8;">
+        <li>Sahoo, S., Arriola, M., Schiff, Y., Gokaslan, A., Marber, E., Kuleshov, V., &amp; Ré, C. (2024). Simple and Effective Masked Diffusion Language Models. <em>NeurIPS 2024</em>. <a href="https://arxiv.org/abs/2406.07524" style="color: var(--accent);">arXiv:2406.07524</a></li>
+        <li>Nie, S., Zhu, F., You, Z., Zhang, X., Feng, J., Yan, S., &amp; Zhu, J. (2025). Large Language Diffusion Models. <em>arXiv preprint</em>. <a href="https://arxiv.org/abs/2502.09992" style="color: var(--accent);">arXiv:2502.09992</a></li>
+        <li>Gong, S., Agarwal, S., Zhang, Y., Ye, J., Zheng, L., Li, M., An, C., Zhao, P., Bi, W., Han, J., Peng, H., &amp; Kong, L. (2025). Scaling Diffusion Language Models via Adaptation from Autoregressive Models. <em>ICLR 2025</em>. <a href="https://openreview.net/forum?id=j1tSLYKwg8" style="color: var(--accent);">OpenReview</a> | <a href="https://github.com/HKUNLP/DiffuLLaMA" style="color: var(--accent);">GitHub</a></li>
+        <li>Ye, J., Gong, S., Chen, L., Zheng, L., Gao, J., Shi, H., Wu, C., Jiang, X., Li, Z., Bi, W., &amp; Kong, L. (2024). Diffusion of Thoughts: Chain-of-Thought Reasoning in Diffusion Language Models. <em>NeurIPS 2024</em>. <a href="https://arxiv.org/abs/2402.07754" style="color: var(--accent);">arXiv:2402.07754</a></li>
+        <li>ZHZisZZ. dLLM: Simple Diffusion Language Modeling. <a href="https://github.com/ZHZisZZ/dllm" style="color: var(--accent);">github.com/ZHZisZZ/dllm</a></li>
+        <li>Gong, J. (2025). MiniMind-dLM — 离散扩散语言模型技术讨论. <em>GitHub Discussions</em>. <a href="https://github.com/jingyaogong/minimind/discussions/618" style="color: var(--accent);">minimind/discussions/618</a></li>
+      </ol>
+    </section>
+  </main>
+</body>
+</html>
