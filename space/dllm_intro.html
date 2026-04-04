@@ -464,13 +464,19 @@
       min-width: 32px;
       height: 28px;
       padding: 0 6px;
+      border-radius: 0;
       border: 1px solid var(--line);
       background: var(--panel);
+      color: var(--text);
       display: inline-flex;
       align-items: center;
       justify-content: center;
       font-size: 12px;
       font-weight: 600;
+      line-height: 1;
+      white-space: nowrap;
+      flex-shrink: 0;
+      overflow: hidden;
       transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -1236,14 +1242,15 @@
           document.getElementById('stat-p-mask').textContent = t.toFixed(2);
           
           const showTwoRows = currentStep >= 2;
-          const rowStyle = 'display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-bottom: 6px;';
-          const labelStyle = 'font-size: 10px; color: var(--text-3); font-weight: 600; min-width: 40px; text-align: right; margin-right: 8px;';
+          const totalTokens = promptTokens.length + assistantTokens.length;
+          const labelStyle = 'font-size: 10px; color: var(--text-3); font-weight: 600; width: 44px; text-align: right; padding-right: 8px;';
+          const gridStyle = `display: grid; grid-template-columns: ${showTwoRows ? '44px ' : ''}repeat(${totalTokens}, auto); gap: 4px; align-items: center; width: max-content; min-width: 100%;`;
           
-          let html = '';
+          let html = `<div style="overflow-x: auto; overflow-y: hidden; padding-bottom: 2px;"><div style="${gridStyle}">`;
           
           // Row 1: GT（仅在 step>=2 显示）
           if (showTwoRows) {
-            html += `<div style="${rowStyle}"><span style="${labelStyle}">GT</span>`;
+            html += `<span style="${labelStyle}">GT</span>`;
             for (const tok of promptTokens) {
               html += `<span class="anim-token prompt" style="opacity: 0.4; font-size: 10px;">${tok}</span>`;
             }
@@ -1253,18 +1260,19 @@
               if (isMasked) {
                 const pred = predictions[i];
                 const isCorrect = pred === tok;
-                const bg = isCorrect ? '#e8f5e9' : '#ffebee';
-                const border = isCorrect ? '#a5d6a7' : '#ef9a9a';
+                const bg = isCorrect ? 'rgba(108,191,108,0.10)' : 'rgba(229,87,119,0.10)';
+                const border = isCorrect ? 'var(--reveal-border)' : 'var(--mask-border)';
                 html += `<span class="anim-token" style="background: ${bg}; color: var(--text); border-color: ${border};">${tok}</span>`;
               } else {
                 html += `<span class="anim-token" style="opacity: 0.3;">${tok}</span>`;
               }
             }
-            html += '</div>';
           }
           
           // Row 2: 输入 / 预测
-          html += `<div style="${rowStyle}"><span style="${labelStyle}">${showTwoRows ? (currentStep === 2 ? (L() === 'zh' ? '预测' : 'Pred') : (L() === 'zh' ? '输入' : 'Input')) : ''}</span>`;
+          if (showTwoRows) {
+            html += `<span style="${labelStyle}">${currentStep === 2 ? (L() === 'zh' ? '预测' : 'Pred') : (L() === 'zh' ? '输入' : 'Input')}</span>`;
+          }
           for (const tok of promptTokens) {
             html += `<span class="anim-token prompt">${tok}</span>`;
           }
@@ -1292,9 +1300,9 @@
               }
             }
             const mark = (showTwoRows && isMasked) ? (predictions[i] === tok ? '<span style="color:var(--reveal-text);font-size:9px;">✓</span>' : '<span style="color:var(--error-text);font-size:9px;">✗</span>') : '';
-            html += `<span class="anim-token ${cls}" title="pos ${i}" style="position:relative;">${display}${mark ? '<sub style="position:absolute;bottom:-2px;right:-2px;">'+mark+'</sub>' : ''}</span>`;
+            html += `<span class="anim-token ${cls}" title="pos ${i}" style="position:relative; overflow:visible;">${display}${mark ? '<sub style="position:absolute;bottom:-1px;right:-1px; line-height:1;">'+mark+'</sub>' : ''}</span>`;
           }
-          html += '</div>';
+          html += '</div></div>';
           document.getElementById('train-token-display').innerHTML = html;
           
           const statusTexts = L() === 'zh' ? ['原始完整序列', `随机 mask (t=${t.toFixed(2)})`, '模型预测 vs GT 对比', 'loss 计算'] : ['Original sequence', `Random mask (t=${t.toFixed(2)})`, 'Prediction vs GT', 'Loss computation'];
@@ -1324,7 +1332,7 @@
               const isCorrect = pred === tok;
               const ce = ceValues[pos];
               const weighted = ce / t;
-              const rowBg = isCorrect ? 'var(--reveal)' : 'var(--mask)';
+              const rowBg = isCorrect ? 'rgba(58,122,74,0.15)' : 'rgba(160,64,64,0.15)';
               lossHtml += `<tr style="background: ${rowBg}; border-bottom: 1px solid var(--line);">`;
               lossHtml += `<td style="padding: 4px 6px; font-family: monospace;">${pos}</td>`;
               lossHtml += `<td style="padding: 4px 6px; font-weight: 600;">${tok}</td>`;
