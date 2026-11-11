@@ -1,46 +1,372 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html lang="en">
-<head>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-    <link rel="stylesheet" href="index.css" type="text/css"/>
-    <link rel="shortcut icon" href="https://avatars.githubusercontent.com/u/62287848?v=4&size=64"/>
-    <title>jingyaogong</title>
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Jingyao Gong</title>
+  <meta name="author" content="Jingyao Gong">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap">
+  <link rel="stylesheet" type="text/css" href="stylesheet.css">
+  <style>
+    body { margin: 0; color: #222; background: #f5f6f8; }
+    body, p, li, td, a, strong, span, div { font-family: 'Lato', Verdana, Helvetica, sans-serif; font-size: 15px; }
+    p, li { line-height: 1.65; }
+    .nav { position: sticky; top: 0; z-index: 10; background: #fff; border-top: 3px solid #1f3a5f; border-bottom: 1px solid #e5e7eb; }
+    .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px; height: 46px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box; }
+    .nav-links a { margin-right: 28px; font-size: 14.5px; font-weight: 500; color: #4b5563; }
+    .nav-links a:hover { color: #1f3a5f; text-decoration: none; }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 24px 40px; box-sizing: border-box; }
+    .card { background: #fff; border: 1px solid #e8eaed; border-radius: 4px; margin-bottom: 14px; scroll-margin-top: 72px; }
+    .card-body { padding: 28px 40px; }
+    .card-head { padding: 14px 24px; border-bottom: 1px solid #e8eaed; font-size: 17px; font-weight: 700; color: #111827; }
+    .intro { display: flex; gap: 48px; align-items: flex-start; padding: 44px 44px 6px; }
+    .intro-text { flex: 1; }
+    .intro-text name { display: block; font-size: 36px; font-weight: 400; line-height: 1.15; color: #111827; }
+    .affil { display: flex; align-items: center; gap: 8px; margin: 10px 0 18px; font-size: 16px; color: #374151; }
+    .affil img { height: 22px; }
+    .loc { display: inline-flex; align-items: center; gap: 4px; margin-left: 10px; padding-left: 12px; border-left: 1px solid #d9dce1; font-size: inherit; color: inherit; }
+    .loc svg { width: 15px; height: 15px; color: #c0392b; }
+    .intro-photo { width: 165px; flex-shrink: 0; padding: 4px; border: 1px solid #e5e7eb; }
+    .intro-photo img { width: 100%; display: block; }
+    .contact { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 44px; padding: 0 0 32px; }
+    .contact a { display: inline-flex; align-items: center; gap: 7px; color: #374151; font-size: 14px; padding: 6px 14px; border: 1px solid #d9dce1; border-radius: 999px; background: #f8fafc; line-height: 1.1; transition: all .15s; }
+    .contact a:hover { text-decoration: none; color: #1f3a5f; border-color: #1f3a5f; background: #fff; }
+    .mail { position: relative; }
+    .caret-btn { display: inline-flex; padding: 3px; margin: -3px -6px -3px -2px; border-radius: 50%; }
+    .caret-btn:hover { background: #e5e7eb; }
+    .contact svg.caret { width: 12px; height: 12px; color: #6b7280; transition: transform .15s; }
+    .mail.open svg.caret { transform: rotate(180deg); }
+    .mail-pop { display: none; position: absolute; top: 100%; left: 0; z-index: 10; padding-top: 6px; }
+    .mail.open .mail-pop { display: flex; flex-direction: column; gap: 6px; }
+    .contact .mail-pop a { background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,.08); white-space: nowrap; }
+    .contact svg { width: 16px; height: 16px; color: #6b7280; }
+    .contact .mono { font-size: 14px; }
+    .cols { display: flex; gap: 48px; }
+    .cols > div { flex: 1; min-width: 0; }
+    .sec-title { font-size: 17px; font-weight: 700; color: #111827; margin: 0 0 10px; }
+    .sec-title.next { margin-top: 26px; }
+    .entry { margin-bottom: 12px; }
+    .entry-top { font-size: 16px; color: #111827; }
+    .entry-sub { display: flex; justify-content: space-between; gap: 12px; font-size: 13.5px; color: #4b5563; }
+    .entry-sub em, .date { font-style: italic; color: #4b5563; white-space: nowrap; font-size: 13.5px; }
+    ul.tight { margin: 0; padding-left: 18px; }
+    ul.tight li { font-size: 13.5px; line-height: 1.7; }
+    ul.tight li .row { display: flex; justify-content: space-between; gap: 12px; }
+    ul.tight li span, ul.tight li a { font-size: 13.5px; }
+    .pub { display: flex; gap: 24px; align-items: center; padding: 18px 28px; border-bottom: 1px solid #eef0f2; }
+    .pub-fig { width: 220px; height: 124px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border: 1px solid #eceef1; border-radius: 4px; background: #fff; overflow: hidden; }
+    .pub-fig:empty { border: 0; }
+    .pub-fig img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .pub-body { flex: 1; min-width: 0; }
+    .proj-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 20px 24px 24px; }
+    .proj { border: 1px solid #d0d7de; border-radius: 6px; padding: 16px; display: flex; flex-direction: column; }
+    .proj-head svg { margin-right: 8px; }
+    .proj-head a { display: inline-flex; align-items: center; color: #0969da; font-size: 15px; }
+    .proj-head strong { color: #0969da; font-size: 15px; }
+    .proj-head svg { width: 16px; height: 16px; color: #59636e; }
+    .proj-desc { flex: 1; margin: 8px 0 12px; font-size: 13.5px; color: #59636e; line-height: 1.55; }
+    .proj-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+    .proj-badges img { height: 20px; }
+    .pub:last-child { border-bottom: 0; }
+    .pub-title { font-size: 17px; color: #111827; }
+    .pub-authors { font-size: 13.5px; color: #374151; margin-top: 3px; }
+    .pub-venue { font-size: 13.5px; margin-top: 2px; }
+    .pub-venue em { font-size: 13.5px; }
+    .pub-type { display: inline-block; margin-left: 6px; padding: 0 7px; border: 1px solid #9ca3af; border-radius: 3px; font-size: 11.5px; color: #4b5563; line-height: 1.5; vertical-align: 1px; }
+    .pub-links, .pub-links a { font-size: 13.5px; margin-top: 2px; }
+    .me { font-weight: 700; font-size: inherit; text-decoration: underline; text-underline-offset: 2px; }
+    .pub-authors sup { font-size: 11px; font-weight: 700; margin-left: 1px; }
+    .card-note { float: right; font-weight: 400; font-size: 13px; color: #6b7280; }
+    name, .card-head, .sec-title, .nav-links a, .pub-title, .proj-head a, .proj-head strong { font-family: 'Montserrat', 'Lato', sans-serif; }
+    .intro-text name { font-weight: 500; letter-spacing: -0.01em; }
+    .card-head, .sec-title { font-weight: 600; }
+    .pub-title { font-size: 16px; font-weight: 500; }
+    .ico { width: 19px; height: 19px; color: #1f3a5f; vertical-align: -3px; margin-right: 9px; }
+    .card-head .ico { margin-right: 10px; }
+    .entry { display: flex; gap: 12px; align-items: center; padding: 6px 8px; margin: 0 -8px 6px; border-radius: 6px; transition: background .15s; }
+    .entry:hover, .pub:hover { background: #f8fafc; }
+    .entry-logo { width: 28px; height: 28px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .entry-logo img { max-width: 100%; max-height: 100%; }
+    .entry-main { flex: 1; min-width: 0; }
+    ul.awards { list-style: none; padding-left: 0; }
+    ul.awards li { padding: 3px 0; }
+    ul.awards li .row > span:first-child { display: flex; gap: 9px; align-items: flex-start; }
+    .aw { width: 16px; height: 16px; flex-shrink: 0; margin-top: 3px; }
+    .aw.gold { color: #b8862b; }
+    .aw.silver { color: #8a94a3; }
+    .aw.navy { color: #1f3a5f; }
+    .pub { transition: background .15s; }
+    .theme-btn { width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 50%; background: transparent; color: #4b5563; cursor: pointer; }
+    .theme-btn:hover { color: #1f3a5f; background: #eef0f3; }
+    .theme-btn svg { width: 15px; height: 15px; }
+    .theme-btn .sun, html[data-theme=dark] .theme-btn .moon { display: none; }
+    html[data-theme=dark] .theme-btn .sun { display: block; }
+    html[data-theme=dark] {
+      color-scheme: dark;
+      .theme-btn { color: #c4c9d2; }
+      .theme-btn:hover { color: #a8c7f0; background: #262a31; }
+      body { color: #d1d5db; background: #0f1115; }
+      a { color: #7aa7e6; }
+      a:hover, a:focus { color: #a8c7f0; }
+      .nav, .card { background: #181b21; border-color: #2a2e36; }
+      .nav { border-top-color: #4a7bc0; }
+      .card-head, .pub { border-bottom-color: #2a2e36; }
+      .nav-links a, .contact a, .affil, .pub-authors { color: #c4c9d2; }
+      .nav-links a:hover, .contact a:hover { color: #a8c7f0; }
+      .card-head, .sec-title, .entry-top, .pub-title, .intro-text name { color: #eef0f3; }
+      .entry-sub, .entry-sub em, .date, .card-note, .pub-type { color: #9aa1ad; }
+      .pub-type, .loc { border-color: #4b515c; }
+      .loc svg { color: #f87171; }
+      .intro-photo, .pub-fig { border-color: #2a2e36; }
+      .contact a { background: #20242b; border-color: #333944; }
+      .contact a:hover { background: #181b21; border-color: #a8c7f0; }
+      .contact .mail-pop a { background: #20242b; box-shadow: 0 4px 12px rgba(0,0,0,.4); }
+      .contact a[href*="github"] svg { color: #e6e6e6 !important; }
+      .caret-btn:hover { background: #333944; }
+      .ico, .aw.navy { color: #8fb3e6; }
+      .entry:hover, .pub:hover { background: #1f232a; }
+      .affil img, .entry-logo img { background: #fff; border-radius: 4px; padding: 2px; box-sizing: border-box; }
+      .pub-fig img { filter: brightness(.9); }
+      .proj { border-color: #30363d; }
+      .proj-head a, .proj-head strong { color: #4493f8; }
+      .proj-head svg, .proj-desc { color: #9198a1; }
+    }
+    @media (max-width: 760px) {
+      .nav-inner { padding: 0 16px; }
+      .nav-links a { margin-right: 20px; font-size: 14px; }
+      .wrap { padding: 14px 12px 28px; }
+      .intro { flex-direction: column-reverse; align-items: center; padding: 28px 22px 4px; gap: 16px; }
+      .intro-text name { font-size: 28px; text-align: center; }
+      .affil { flex-direction: column; gap: 6px; font-size: 14px; text-align: center; }
+      .loc { display: flex; justify-content: center; margin: 4px 0 0; padding: 0; border: 0; }
+      .intro-photo { width: 120px; }
+      .contact { margin: 0 22px; padding-bottom: 24px; gap: 8px; justify-content: center; }
+      .contact a { padding: 5px 12px; font-size: 13px; }
+      .entry { align-items: flex-start; }
+      .entry-logo { margin-top: 2px; }
+      .entry-sub { flex-direction: column; gap: 0; }
+      .card-body { padding: 22px; }
+      .cols { flex-direction: column; gap: 20px; }
+      .pub { flex-direction: column; align-items: flex-start; padding: 16px 20px; }
+      .pub-fig { width: 100%; }
+      .proj-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <script>document.documentElement.dataset.theme = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    document.addEventListener('click', function (e) { document.querySelectorAll('.mail.open').forEach(function (m) { if (!m.contains(e.target)) m.classList.remove('open'); }); });</script>
 </head>
 <body>
-<table id="tlayout">
-    <tr>
-        <td id="layout-content">
-            <div id="toptitle">
-                <h1>Jingyao Gong</h1>
-            </div>
-            <table class="imgtable">
-                <tr>
-                    <td>
-                        <img src="./photos/photo.jpg" alt="alt text"
-                             style="min-width: 105px;width: 9vh;height: auto;"/>
-                    </td>
-                    <td>
-                        <p>
-                            Student<br/>
-                            Jiangsu, China<br/>
-                            <a href="mailto:gongjy.cs@foxmail.com">gongjy.cs@foxmail.com</a>
-                        </p>
-                    </td>
-                </tr>
-            </table>
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="i-cap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></symbol>
+  <symbol id="i-case" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></symbol>
+  <symbol id="i-medal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.48 12.89 17 22l-5-3-5 3 1.52-9.11"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></symbol>
+</svg>
+<div class="nav">
+  <div class="nav-inner">
+    <span class="nav-links">
+      <a href="#about">Home</a>
+      <a href="#publications">Publications</a>
+      <a href="#projects">Projects</a>
+    </span>
+    <button class="theme-btn" title="Toggle theme" onclick="var t=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=t;localStorage.setItem('theme',t)"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg></button>
+  </div>
+</div>
 
-            <div>
-                <a href="https://github.com/jingyaogong">
-                    <img src="https://github-profile-summary-cards.vercel.app/api/cards/profile-details?username=jingyaogong"
-                         style="width: 100%;"/>
-                </a>
-                <a href="https://github.com/jingyaogong">
-                    <img src="https://raw.githubusercontent.com/jingyaogong/jingyaogong/output/github-contribution-grid-snake.svg"
-                         style="width: 100%;"/>
-                </a>
-            </div>
-        </td>
-    </tr>
-</table>
+<div class="wrap">
+
+  <div id="about" class="card">
+    <div class="intro">
+      <div class="intro-text">
+        <name>Jingyao Gong</name>
+        <div class="affil"><img src="images/logo/nju.png" alt="Nanjing University">Ph.D. Student, Nanjing University<span class="loc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Suzhou, Jiangsu, China</span></div>
+        <p>
+          I am a Ph.D. student at <a href="https://www.nju.edu.cn/">Nanjing University</a>, advised by Prof. <a href="https://liwenbin.cn">Wenbin Li</a> in the <a href="https://github.com/RL-MIND">RL-MIND Group</a>.
+          My research focuses on efficient AI models.
+          I am also interested in large language models, including pre-training, post-training and reinforcement learning, and their extension to vision and speech.
+        </p>
+        <p>
+          I received my M.S. (2025) and B.Eng. (2022) from <a href="https://www.ujs.edu.cn/">Jiangsu University</a>, where I worked with Prof. <a href="https://cs.ujs.edu.cn/info/1518/30107.htm">Heping Song</a> on image compressed sensing,
+          and then worked as an algorithm engineer at <a href="https://www.widi.org.cn/">Westlake Institute for Data Intelligence</a>.
+        </p>
+      </div>
+      <div class="intro-photo">
+        <img alt="Jingyao Gong" src="photos/photo.jpg">
+      </div>
+    </div>
+    <div class="contact">
+        <div class="mail"><a href="mailto:gongjy.cs@foxmail.com"><svg style="color:#ea4335" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span class="mono">gongjy.cs@foxmail.com</span><span class="caret-btn" title="More emails" onclick="event.preventDefault();event.stopPropagation();this.closest('.mail').classList.toggle('open')"><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></span></a>
+          <div class="mail-pop"><a href="mailto:jingyaogong@smail.nju.edu.cn">jingyaogong@smail.nju.edu.cn</a><a href="mailto:gongjy@stmail.ujs.edu.cn">gongjy@stmail.ujs.edu.cn</a></div>
+        </div>
+        <a href="https://scholar.google.com/citations?user=B8HNAFgAAAAJ"><svg style="color:#4285f4" viewBox="0 0 24 24" fill="currentColor"><path d="M5.242 13.769 0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 1 0 0 14 7 7 0 0 0 0-14z"/></svg>Google Scholar</a>
+        <a href="https://github.com/jingyaogong"><svg style="color:#181717" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.7.5.6 5.6.6 11.9c0 5 3.3 9.3 7.9 10.8.6.1.8-.3.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 .1.5 2.7 3.2 1.9.1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.6.1-3.1 0 0 1-.3 3.2 1.2.9-.3 1.9-.4 2.9-.4s2 .1 2.9.4c2.2-1.5 3.2-1.2 3.2-1.2.6 1.5.2 2.8.1 3.1.8.9 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.8C23.4 5.6 18.3.5 12 .5Z"/></svg>GitHub</a>
+        <a href="https://huggingface.co/jingyaogong"><svg style="color:#ff9d00" viewBox="0 0 24 24" fill="currentColor"><path d="M12.025 1.13c-5.77 0-10.449 4.647-10.449 10.378 0 1.112.178 2.181.503 3.185.064-.222.203-.444.416-.577a.96.96 0 0 1 .524-.15c.293 0 .584.124.84.284.278.173.48.408.71.694.226.282.458.611.684.951v-.014c.017-.324.106-.622.264-.874s.403-.487.762-.543c.3-.047.596.06.787.203s.31.313.4.467c.15.257.212.468.233.542.01.026.653 1.552 1.657 2.54.616.605 1.01 1.223 1.082 1.912.055.537-.096 1.059-.38 1.572.637.121 1.294.187 1.967.187.657 0 1.298-.063 1.921-.178-.287-.517-.44-1.041-.384-1.581.07-.69.465-1.307 1.081-1.913 1.004-.987 1.647-2.513 1.657-2.539.021-.074.083-.285.233-.542.09-.154.208-.323.4-.467a1.08 1.08 0 0 1 .787-.203c.359.056.604.29.762.543s.247.55.265.874v.015c.225-.34.457-.67.683-.952.23-.286.432-.52.71-.694.257-.16.547-.284.84-.285a.97.97 0 0 1 .524.151c.228.143.373.388.43.625l.006.04a10.3 10.3 0 0 0 .534-3.273c0-5.731-4.678-10.378-10.449-10.378M8.327 6.583a1.5 1.5 0 0 1 .713.174 1.487 1.487 0 0 1 .617 2.013c-.183.343-.762-.214-1.102-.094-.38.134-.532.914-.917.71a1.487 1.487 0 0 1 .69-2.803m7.486 0a1.487 1.487 0 0 1 .689 2.803c-.385.204-.536-.576-.916-.71-.34-.12-.92.437-1.103.094a1.487 1.487 0 0 1 .617-2.013 1.5 1.5 0 0 1 .713-.174m-10.68 1.55a.96.96 0 1 1 0 1.921.96.96 0 0 1 0-1.92m13.838 0a.96.96 0 1 1 0 1.92.96.96 0 0 1 0-1.92M8.489 11.458c.588.01 1.965 1.157 3.572 1.164 1.607-.007 2.984-1.155 3.572-1.164.196-.003.305.12.305.454 0 .886-.424 2.328-1.563 3.202-.22-.756-1.396-1.366-1.63-1.32q-.011.001-.02.006l-.044.026-.01.008-.03.024q-.018.017-.035.036l-.032.04a1 1 0 0 0-.058.09l-.014.025q-.049.088-.11.19a1 1 0 0 1-.083.116 1.2 1.2 0 0 1-.173.18q-.035.029-.075.058a1.3 1.3 0 0 1-.251-.243 1 1 0 0 1-.076-.107c-.124-.193-.177-.363-.337-.444-.034-.016-.104-.008-.2.022q-.094.03-.216.087-.06.028-.125.063l-.13.074q-.067.04-.136.086a3 3 0 0 0-.135.096 3 3 0 0 0-.26.219 2 2 0 0 0-.12.121 2 2 0 0 0-.106.128l-.002.002a2 2 0 0 0-.09.132l-.001.001a1.2 1.2 0 0 0-.105.212q-.013.036-.024.073c-1.139-.875-1.563-2.317-1.563-3.203 0-.334.109-.457.305-.454m.836 10.354c.824-1.19.766-2.082-.365-3.194-1.13-1.112-1.789-2.738-1.789-2.738s-.246-.945-.806-.858-.97 1.499.202 2.362c1.173.864-.233 1.45-.685.64-.45-.812-1.683-2.896-2.322-3.295s-1.089-.175-.938.647 2.822 2.813 2.562 3.244-1.176-.506-1.176-.506-2.866-2.567-3.49-1.898.473 1.23 2.037 2.16c1.564.932 1.686 1.178 1.464 1.53s-3.675-2.511-4-1.297c-.323 1.214 3.524 1.567 3.287 2.405-.238.839-2.71-1.587-3.216-.642-.506.946 3.490 2.056 3.522 2.064 1.29.33 4.568 1.028 5.713-.624m5.349 0c-.824-1.19-.766-2.082.365-3.194 1.13-1.112 1.789-2.738 1.789-2.738s.246-.945.806-.858.97 1.499-.202 2.362c-1.173.864.233 1.45.685.64.451-.812 1.683-2.896 2.322-3.295s1.089-.175.938.647-2.822 2.813-2.562 3.244 1.176-.506 1.176-.506 2.866-2.567 3.49-1.898-.473 1.23-2.037 2.16c-1.564.932-1.686 1.178-1.464 1.53s3.675-2.511 4-1.297c.323 1.214-3.524 1.567-3.287 2.405.238.839 2.71-1.587 3.216-.642.506.946-3.49 2.056-3.522 2.064-1.29.33-4.568 1.028-5.713-.624"/></svg>Hugging Face</a>
+        <a href="https://modelscope.cn/profile/gongjy"><svg style="color:#624aff" viewBox="0 0 24 24" fill="currentColor"><path d="M2.667 5.333V8H0v5.333h2.667v-2.666H.5V8.5h2.166v2.166h2.666V8H8V5.333Zm0 8v5.334H8V16H5.333v-2.667Zm13.333-8V8h2.667v2.667h2.666V8.5H23.5v2.166h-2.166v2.666H24V8h-2.667V5.333Zm5.333 8h-2.666V16H16v2.667h5.333zM8 10.667v2.666h2.667v-2.666zm2.667 2.666V16h2.666v-2.667zm2.666 0H16v-2.666h-2.667z"/></svg>ModelScope</a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body cols">
+      <div>
+        <div class="sec-title"><svg class="ico"><use href="#i-cap"/></svg>Education</div>
+        <div class="entry">
+          <div class="entry-logo"><img src="images/logo/nju_emblem.png" alt="Nanjing University"></div>
+          <div class="entry-main">
+            <div class="entry-top"><a href="https://www.nju.edu.cn/" style="color:inherit">Nanjing University</a></div>
+            <div class="entry-sub"><span>Ph.D. Student (Advisor: Prof. <a href="https://liwenbin.cn">Wenbin Li</a>)</span><em>Sep. 2026 - Present</em></div>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="entry-logo"><img src="images/logo/ujs.png" alt="Jiangsu University"></div>
+          <div class="entry-main">
+            <div class="entry-top"><a href="https://www.ujs.edu.cn/" style="color:inherit">Jiangsu University</a></div>
+            <div class="entry-sub"><span>M.S. in Computer Technology (Rank: 1/187, Advisor: Prof. <a href="https://cs.ujs.edu.cn/info/1518/30107.htm">Heping Song</a>)</span><em>Sep. 2022 - Jun. 2025</em></div>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="entry-logo"><img src="images/logo/ujs.png" alt="Jiangsu University"></div>
+          <div class="entry-main">
+            <div class="entry-top"><a href="https://www.ujs.edu.cn/" style="color:inherit">Jiangsu University</a></div>
+            <div class="entry-sub"><span>B.Eng. in Software Engineering (Rank: 1/61)</span><em>Sep. 2018 - Jun. 2022</em></div>
+          </div>
+        </div>
+
+        <div class="sec-title next"><svg class="ico"><use href="#i-case"/></svg>Experience</div>
+        <div class="entry">
+          <div class="entry-logo"><img src="images/logo/widi.png" alt="Westlake Institute for Data Intelligence"></div>
+          <div class="entry-main">
+            <div class="entry-top"><a href="https://www.widi.org.cn/" style="color:inherit">Westlake Institute for Data Intelligence</a></div>
+            <div class="entry-sub"><span>Algorithm Engineer, LLM pre-training and agentic RL</span><em>Dec. 2024 - Jul. 2026</em></div>
+          </div>
+        </div>
+        <div class="entry">
+          <div class="entry-logo"><img src="images/logo/calix.png" alt="Calix"></div>
+          <div class="entry-main">
+            <div class="entry-top"><a href="https://www.calix.com/" style="color:inherit">Calix</a></div>
+            <div class="entry-sub"><span>Algorithm Intern, retrieval-augmented code generation</span><em>Dec. 2023 - Nov. 2024</em></div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="sec-title"><svg class="ico"><use href="#i-trophy"/></svg>Honors &amp; Awards</div>
+        <ul class="tight awards">
+          <li><div class="row"><span><svg class="aw navy"><use href="#i-medal"/></svg>Outstanding Master's Thesis, Jiangsu University</span><span class="date">2025</span></div></li>
+          <li><div class="row"><span><svg class="aw navy"><use href="#i-medal"/></svg>Outstanding Graduate, Jiangsu University</span><span class="date">2025</span></div></li>
+          <li><div class="row"><span><svg class="aw gold"><use href="#i-trophy"/></svg>Champion, AI Hackathon, Westlake Institute for Data Intelligence</span><span class="date">2025</span></div></li>
+          <li><div class="row"><span><svg class="aw navy"><use href="#i-medal"/></svg>National Scholarship for Graduate Students</span><span class="date">2024</span></div></li>
+          <li><div class="row"><span><svg class="aw gold"><use href="#i-trophy"/></svg>First Place, National AI Competition, Visual Feature Coding Track</span><span class="date">2023</span></div></li>
+          <li><div class="row"><span><svg class="aw silver"><use href="#i-trophy"/></svg>Second Prize, "Huawei Cup" National Graduate Math. Modeling Contest</span><span class="date">2023</span></div></li>
+          <li><div class="row"><span><svg class="aw gold"><use href="#i-trophy"/></svg>First Prize, Jiangsu Graduate Mathematical Modeling Competition</span><span class="date">2023</span></div></li>
+          <li><div class="row"><span><svg class="aw silver"><use href="#i-trophy"/></svg>Silver Medal, Kaggle Happywhale Competition</span><span class="date">2022</span></div></li>
+          <li><div class="row"><span><svg class="aw navy"><use href="#i-medal"/></svg>National Scholarship for Undergraduate Students</span><span class="date">2022</span></div></li>
+          <li><div class="row"><span><svg class="aw navy"><use href="#i-medal"/></svg>Outstanding Undergraduate Graduate, Jiangsu University</span><span class="date">2022</span></div></li>
+          <li><div class="row"><span><svg class="aw silver"><use href="#i-trophy"/></svg>Second Prize, National College Students Mathematics Competition (twice)</span><span class="date">2019 - 2021</span></div></li>
+          <li><div class="row"><span><svg class="aw gold"><use href="#i-trophy"/></svg>First Prize and Second Prize, Jiangsu College Students Mathematics Competition</span><span class="date">2019 - 2021</span></div></li>
+          <li><div class="row"><span><svg class="aw gold"><use href="#i-trophy"/></svg>First Prize (Jiangsu), Lanqiao Cup Programming Contest</span><span class="date">2018 - 2022</span></div></li>
+          <li><div class="row"><span><svg class="aw navy"><use href="#i-medal"/></svg>First-Class Scholarship (three times); Merit Student (twice), Jiangsu University</span><span class="date">2018 - 2022</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="publications" class="card">
+    <div class="card-head"><svg class="ico"><use href="#i-book"/></svg>Publications<span class="card-note">* Student first author</span></div>
+    <div class="pub">
+      <div class="pub-fig"><img src="images/paper/minimind-o.jpg" alt=""></div>
+      <div class="pub-body">
+        <div class="pub-title">MiniMind-O Technical Report: An Open Small-Scale Speech-Native Omni Model</div>
+        <div class="pub-authors"><span class="me">J. Gong</span></div>
+        <div class="pub-venue"><em>arXiv preprint arXiv:2605.03937</em>, 2026 <span class="pub-type">Preprint</span></div>
+        <div class="pub-links">[<a href="https://arxiv.org/abs/2605.03937">Paper</a>] [<a href="https://github.com/jingyaogong/minimind-o">Code</a>]</div>
+      </div>
+    </div>
+    <div class="pub">
+      <div class="pub-fig"><img src="images/paper/mwcs.jpg" alt=""></div>
+      <div class="pub-body">
+        <div class="pub-title">Multi-Scale Wavelet Convolutional Sampling and Cross-Stage Feature Enhancement Reconstruction for Image Compressed Sensing</div>
+        <div class="pub-authors">L. Qin, Z. Xiong, <span class="me">J. Gong</span>, Z. Zhong, Y. Yi, H. Song</div>
+        <div class="pub-venue"><em>Pattern Recognition</em>, 2026, accepted <span class="pub-type">Journal</span></div>
+        <div class="pub-links">[<a href="https://doi.org/10.2139/ssrn.6734332">Preprint</a>]</div>
+      </div>
+    </div>
+    <div class="pub">
+      <div class="pub-fig"><img src="images/paper/rht.jpg" alt=""></div>
+      <div class="pub-body">
+        <div class="pub-title">Representation Sampling and Hybrid Transformer Network for Image Compressed Sensing</div>
+        <div class="pub-authors">H. Song, <span class="me">J. Gong</span><sup>*</sup>, H. Jia, X. Shen, J. Gou, H. Meng, L. Wang</div>
+        <div class="pub-venue"><em>IEEE Transactions on Circuits and Systems for Video Technology</em>, 2026 <span class="pub-type">Journal</span></div>
+        <div class="pub-links">[<a href="https://doi.org/10.1109/TCSVT.2025.3614371">Paper</a>]</div>
+      </div>
+    </div>
+    <div class="pub">
+      <div class="pub-fig"><img src="images/paper/cdrn.jpg" alt=""></div>
+      <div class="pub-body">
+        <div class="pub-title">Context-Aware Detail Recovery Network for Single Image Super-Resolution</div>
+        <div class="pub-authors">H. Song, D. Zhou, <span class="me">J. Gong</span>, H. Jia, X. Shen, J. Gou</div>
+        <div class="pub-venue"><em>Engineering Applications of Artificial Intelligence</em>, 186: 116476, 2026 <span class="pub-type">Journal</span></div>
+        <div class="pub-links">[<a href="https://doi.org/10.1016/j.engappai.2026.116476">Paper</a>]</div>
+      </div>
+    </div>
+    <div class="pub">
+      <div class="pub-fig"><img src="images/paper/msws.jpg" alt=""></div>
+      <div class="pub-body">
+        <div class="pub-title">Multi-Scale Sampling and Windowed Sparse Self-Attention Reconstruction Network for Image Compressive Sensing</div>
+        <div class="pub-authors">H. Song, L. Zhang, <span class="me">J. Gong</span>, H. Jia, X. Shen, J. Gou, Y. Lai, H. Meng</div>
+        <div class="pub-venue"><em>Image and Vision Computing</em>, 106181, 2026 <span class="pub-type">Journal</span></div>
+        <div class="pub-links">[<a href="https://doi.org/10.1016/j.imavis.2026.106181">Paper</a>]</div>
+      </div>
+    </div>
+    <div class="pub">
+      <div class="pub-fig"><img src="images/paper/mcfd.jpg" alt=""></div>
+      <div class="pub-body">
+        <div class="pub-title">Multi-Cross Sampling and Frequency-Division Reconstruction for Image Compressed Sensing</div>
+        <div class="pub-authors">H. Song, <span class="me">J. Gong</span><sup>*</sup>, H. Meng, Y. Lai</div>
+        <div class="pub-venue"><em>Proceedings of the AAAI Conference on Artificial Intelligence (AAAI)</em>, 38(5): 4909-4917, 2024 <span class="pub-type">Conference</span></div>
+        <div class="pub-links">[<a href="https://doi.org/10.1609/aaai.v38i5.28294">Paper</a>]</div>
+      </div>
+    </div>
+    <div class="pub">
+      <div class="pub-fig"><img src="images/paper/salsa.jpg" alt=""></div>
+      <div class="pub-body">
+        <div class="pub-title">SALSA-Net: Explainable Deep Unrolling Networks for Compressed Sensing</div>
+        <div class="pub-authors">H. Song, Q. Ding, <span class="me">J. Gong</span>, H. Meng, Y. Lai</div>
+        <div class="pub-venue"><em>Sensors</em>, 23(11): 5142, 2023 <span class="pub-type">Journal</span></div>
+        <div class="pub-links">[<a href="https://doi.org/10.3390/s23115142">Paper</a>]</div>
+      </div>
+    </div>
+    <div class="pub">
+      <div class="pub-fig"><img src="images/paper/bpdun.jpg" alt=""></div>
+      <div class="pub-body">
+        <div class="pub-title">Back Projection Deep Unrolling Network for Handwritten Text Image Super Resolution</div>
+        <div class="pub-authors">H. Song, H. Ma, Y. Si, <span class="me">J. Gong</span>, H. Meng, Y. Lai</div>
+        <div class="pub-venue"><em>Computers and Electrical Engineering</em>, 111: 108965, 2023 <span class="pub-type">Journal</span></div>
+        <div class="pub-links">[<a href="https://doi.org/10.1016/j.compeleceng.2023.108965">Paper</a>]</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="projects" class="card">
+    <div class="card-head"><svg class="ico"><use href="#i-code"/></svg>Projects</div>
+    <div class="proj-grid">
+    <div class="proj">
+      <div class="proj-head"><a href="https://github.com/jingyaogong/minimind"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>jingyaogong/<strong>minimind</strong></a></div>
+      <div class="proj-desc">Training a small language model from scratch, covering tokenizer, pre-training, SFT, LoRA, DPO, PPO/GRPO, tool use, agentic RL and distillation in native PyTorch.</div>
+      <div class="proj-badges"><img src="https://img.shields.io/github/stars/jingyaogong/minimind?style=social" alt="stars"> <img src="https://img.shields.io/github/forks/jingyaogong/minimind?style=social" alt="forks"> <img src="https://img.shields.io/github/license/jingyaogong/minimind?style=flat-square&color=555" alt="license"></div>
+    </div>
+    <div class="proj">
+      <div class="proj-head"><a href="https://github.com/jingyaogong/minimind-v"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>jingyaogong/<strong>minimind-v</strong></a></div>
+      <div class="proj-desc">A small vision-language model trained from scratch with visual alignment and multimodal instruction tuning.</div>
+      <div class="proj-badges"><img src="https://img.shields.io/github/stars/jingyaogong/minimind-v?style=social" alt="stars"> <img src="https://img.shields.io/github/forks/jingyaogong/minimind-v?style=social" alt="forks"> <img src="https://img.shields.io/github/license/jingyaogong/minimind-v?style=flat-square&color=555" alt="license"></div>
+    </div>
+    <div class="proj">
+      <div class="proj-head"><a href="https://github.com/jingyaogong/minimind-o"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"/></svg>jingyaogong/<strong>minimind-o</strong></a></div>
+      <div class="proj-desc">A ~0.1B speech-native omni model with text, audio and image input and streaming speech output.</div>
+      <div class="proj-badges"><img src="https://img.shields.io/github/stars/jingyaogong/minimind-o?style=social" alt="stars"> <img src="https://img.shields.io/github/forks/jingyaogong/minimind-o?style=social" alt="forks"> <img src="https://img.shields.io/github/license/jingyaogong/minimind-o?style=flat-square&color=555" alt="license"></div>
+    </div>
+    </div>
+  </div>
+
+</div>
 </body>
 </html>
